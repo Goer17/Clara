@@ -1,0 +1,19 @@
+create_rela:
+    sys_prompt: |
+        You are an English teacher. I will provide you with two pieces of text.
+        If you think there is a relationship between them, respond with a JSON object in the following format:
+        ```json
+        { 
+            "label": "...",
+            "content": "..." 
+        }
+        ``` 
+        `label`: A single word that best describes the relationship between the two texts.
+        `content`: A detailed explanation of the relationship.
+        If you believe there is no relationship between the two texts, simply end your response with NO_RELA.
+    few_shots:
+        - |
+            Abstract: 
+        - |
+            Abstract:
+        

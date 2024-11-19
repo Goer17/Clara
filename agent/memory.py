@@ -5,6 +5,9 @@ from shortuuid import uuid
 from datetime import datetime
 
 from typing_extensions import List, Dict
+import logging
+
+from pathlib import Path
 
 class Memory:
     def __init__(self):
@@ -12,6 +15,18 @@ class Memory:
         username = "neo4j"
         password = "Yy030518neo4j"
         self.driver = GraphDatabase.driver(uri, auth=(username, password)) # GraphDB
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.WARNING)
+        self.logger.addHandler(console_handler)
+        
+        log_path = Path('logs') / "memory"
+        file_handler = logging.FileHandler(log_path / f"{datetime.now().strftime('%Y-%m-%d')}.log")
+        file_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
 
         chroma_client = PersistentClient()
         self.collection = chroma_client.get_or_create_collection(
@@ -27,9 +42,10 @@ class Memory:
                 ids=[m_item["m_id"]],
                 documents=[m_item["abstract"]]
             )
+            self.logger.info(msg=f"Added memory item: {str(m_item)} in vectorDB")
             return True
         except Exception as e:
-            print(e)
+            self.logger.error(msg=f"Error occurred when adding memory item: {str(m_item)} in vectorDB: {str(e)}")
         
         return False
     
@@ -39,18 +55,20 @@ class Memory:
                 query_texts=[q_text],
                 n_results=n_results
             )
+            self.logger.info(msg=f"Query: ({q_text}) succeeded!")
             return zip(result['ids'][0], result["documents"][0])
         except Exception as e:
-            print(e)
+            self.logger.error(msg=f"Error occurred when querying: {q_text}, n_results = {n_results}: {str(e)}")
     
     def __del_item_in_vec_db(self, m_id: str) -> bool:
         try:
             self.collection.delete(
                 ids=[m_id]
             )
+            self.logger.info(msg=f"Deleted memory item (m_id = {m_id}) in vectorDB")
             return True
         except Exception as e:
-            print(e)
+            self.logger.error(msg=f"Error occurred when deleting memory item (m_id = {m_id}) in vectorDB: {str(e)}")
         
         return False
     
@@ -60,11 +78,13 @@ class Memory:
                 print(f"Key {key} not found in m_item!")
                 return False
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-        m_item["timestamp"] = timestamp
+        m_item["creation_time"] = timestamp
+        m_item["update_time"] = timestamp
         cql_query = f"""
         CREATE ( m_item:memory:{m_item["label"]} {{
             m_id: $m_id,
-            timestamp: $timestamp,
+            creation_time: $creation_time,
+            update_time: $update_time,
             abstract: $abstract,
             content: $content,
             note: $note
@@ -72,7 +92,8 @@ class Memory:
         """
         cql_parameters = { key: m_item.get(key) for key in [
             "m_id",
-            "timestamp",
+            "creation_time",
+            "update_time",
             "abstract",
             "content",
             "note"
@@ -83,10 +104,10 @@ class Memory:
                     query=cql_query,
                     parameters=cql_parameters
                 )
-                return True
+            self.logger.info(msg=f"Added memory item: {str(m_item)} in graphDB")
+            return True
         except Exception as e:
-            print(e)
-        
+            self.logger.error(msg=f"Error occurred when adding memory item: {str(m_item)} in graphDB: {str(e)}")
         return False
         
     
@@ -104,15 +125,16 @@ class Memory:
                     query=cql_query,
                     parameters=cql_parameters
                 )
+            self.logger.info(msg=f"Deleted memory item (m_id = {m_id}) in graphDB")
             return True
         except Exception as e:
-            print(e)
+            self.logger.error(msg=f"Error occurred when deleting memory item (m_id = {m_id}) in graphDB: {str(e)}")
         
         return False
 
     def __lookup_item_in_graph_db(self, m_id: str) -> dict:
         cql_query = """
-        MATCH (m { m_id: $m_id} )
+        MATCH (m { m_id: $m_id } )
         RETURN m
         """
         cql_paramters = {
@@ -124,9 +146,10 @@ class Memory:
                     query=cql_query,
                     parameters=cql_paramters
                 )
+                self.logger.info(msg=f"Found m_item (m_id = {m_id})")
                 return [record.data() for record in result][0]['m']
         except Exception as e:
-            print(e)
+            self.logger.error(msg=f"Error ocurred when looking up m_item (m_id = {m_id}): {str(e)}")
         return {}
                 
 
@@ -151,11 +174,10 @@ class Memory:
                         "content": content
                     }
                 )
-                return True
+            self.logger.info(msg=f"Added relationship {str(rela)} between m1(id = {m1_id}) and m2(id = {m2_id})")
+            return True
         except Exception as e:
-            # TODO
-            print(e)
-        
+            self.logger.error(msg=f"Error occurred when adding relationship {str(rela)} between m1(id = {m1_id}) and m2(id = {m2_id}): {str(e)}")
         return False
         
     def add_item(self, m_item: dict) -> str:
@@ -169,8 +191,7 @@ class Memory:
                 return ""
             return m_id
         except Exception as e:
-            # TODO
-            print(e)
+            pass
         
         return ""
 
@@ -207,5 +228,6 @@ class Memory:
                     MATCH (n) DETACH DELETE n
                     """
                 )
+            self.logger.info(msg="All items was removed!")
         except Exception as e:
-            print(e)
+            pass
