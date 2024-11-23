@@ -1,7 +1,9 @@
-import os
+import yaml, json, re
 from openai import Client
 from typing_extensions import List, Dict
 from agent.memory import Memory
+from pathlib import Path
+from logging import getLogger
 
 class Prompt:
     def __init__(self, template: str, parameters: dict):
@@ -29,27 +31,45 @@ class Agent:
             base_url=base_url
         )
         
-    def generate(self, prompt: Prompt, sys_prompt: Prompt | None = None):
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[
+    def generate(self, prompt: str | Prompt | None = None, sys_prompt: str | Prompt | None = None, few_shots: List[Dict] | None = None):
+        messages = []
+        if sys_prompt:
+            messages.append(
                 {
                     "role": "system",
-                    "content": sys_prompt.value if sys_prompt is not None else ""
-                },
+                    "content": sys_prompt.value if isinstance(sys_prompt, Prompt) else sys_prompt
+                }
+            )
+        for shot in few_shots:
+            messages.append(
+                {
+                    "role": shot["role"],
+                    "content": shot["content"]
+                }
+            )
+        if prompt:
+            messages.append(
                 {
                     "role": "user",
-                    "content": prompt.value
+                    "content": prompt.value if isinstance(prompt, Prompt) else prompt
                 }
-            ]
+            )
+        
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages
         ).choices[0].message.content
         return response
+
 
 
 class Retriever(Agent):
     def __init__(self, model, api_key, base_url):
         super().__init__(model, api_key, base_url)
         self.memo = Memory()
+        retriever_path = Path("agent") / "prompts" / "retriever.yml"
+        with open(retriever_path) as f:
+            self.all_prompts = yaml.safe_load(f)
     
     def __to_m_item(self, text: str) -> Dict:
         """Encode the plain text to well-structured memory item
@@ -58,9 +78,19 @@ class Retriever(Agent):
             text (str): the plain text
 
         Returns:
-            Dict: Encoded memory item with dict format
+            Dict: encoded memory item with dict format
         """
-        pass        
+        pass
+    
+    def __to_m_text(self, m_item: Dict) -> str:
+        """Decode the memory item dictionary to plain text
+
+        Args:
+            m_item (Dict): the memory item
+
+        Returns:
+            str: decoded plain text
+        """
 
     def __add_m_item(self, m_item: Dict) -> str:
         """Add `m_item` to memory module
@@ -85,13 +115,47 @@ class Retriever(Agent):
         """
         pass
     
+    def __generate_rela(self, m1: str, m2: str) -> Dict | None:
+        rela_prompts = self.all_prompts["create_rela"]
+        prompt = Prompt(
+            template=(
+                "```txt\n"
+                "$m1\n"
+                "```\n\n"
+                "```txt\n"
+                "$m2\n"
+                "```\n"
+            ),
+            parameters={
+                "m1": m1,
+                "m2": m2
+            }
+        )
+        response = self.generate(
+            prompt=prompt,
+            sys_prompt=rela_prompts["sys_prompt"],
+            few_shots=rela_prompts["few_shots"]
+        )
+        # TODO: Store the reasoning stage in Log
+        json_block = re.search(pattern=r"```json\n(.*?)\n```", string=response, flags=re.S)
+        if "NO_RELA" in response or not json_block:
+            return None
+        try:
+            dict_response = json.loads(json_block.group(1))
+            return dict_response
+        except Exception as e:
+            # TODO
+            pass
+        return None
+        
+    
     def __create_rela(self, m1_id: str, m2_id: str) -> Dict:
         m1_item = self.memo.lookup(m_id=m1_id)
         m2_item = self.memo.lookup(m_id=m2_id)
         m1_con = f"Abstract: {m1_item['abstract']}\nContent: {m1_item['content']}"
         m2_con = f"Abstract: {m2_item['abstract']}\nContent: {m2_item['content']}"
         
-        rela = {}
+        rela = self.__generate_rela(m1=m1_con, m2=m2_con)
         
         self.memo.add_rela(m1_id=m1_id, m2_id=m2_id, rela=rela)
     

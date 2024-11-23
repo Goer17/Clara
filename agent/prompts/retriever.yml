@@ -1,6 +1,6 @@
 create_rela:
     sys_prompt: |
-        You are an English teacher. I will provide you with two pieces of text.
+        You are an English teacher. I will provide you with two pieces of text, which may contain vocabulary, grammar, or errors commonly made by students.
         If you think there is a relationship between them, respond with a JSON object in the following format:
         ```json
         { 
@@ -8,12 +8,98 @@ create_rela:
             "content": "..." 
         }
         ``` 
-        `label`: A single word that best describes the relationship between the two texts.
+        `label`: A single word that best describes the relationship between the two texts. For example: "synonyms", "antonyms", "relative". 
         `content`: A detailed explanation of the relationship.
-        If you believe there is no relationship between the two texts, simply end your response with NO_RELA.
+        If you believe there is no relationship between the two texts, simply end your response with "NO_RELA"
     few_shots:
-        - |
-            Abstract: 
-        - |
-            Abstract:
+        # shot-1
+        - role: user
+          content: |
+            ```txt
+            word: happy
+            meaning:
+            [adjective] Feeling or showing pleasure or contentment.
+            ```
+
+            ```txt
+            word: joyful
+            meaning:
+            [adjective] Feeling, expressing, or causing great happiness or delight.
+            ```
+        - role: assistant
+          content: |
+            Happy and joyful are synonyms often used to describe positive emotional states, though joyful typically conveys a more intense feeling of happiness.
+            ```json
+            {
+                "label": "synonyms",
+                "content": "Happy and joyful describe similar positive emotional states."
+            }
+            ```
         
+        # shot-2
+        - role: user
+          content: |
+            ```txt
+            word: meticulous  
+            meaning:  
+            [adjective] Showing great attention to detail; very careful and precise.  
+            ```
+
+            ```txt
+            word: careless  
+            meaning:  
+            [adjective] Not giving sufficient attention or thought to avoiding harm or errors.  
+            ```
+        - role: assistant
+          content: |
+            Meticulous and careless are opposites in describing the degree of attention and precision in actions, with one emphasizing thoroughness and the other neglect.
+            ```json
+            {
+                "label": "antonyms",  
+                "content": "Meticulous and careless describe opposing attitudes towards attention to detail."
+            }
+            ```
+        
+        # shot-3
+        - role: user
+          content: |
+            ```txt
+            word: violin
+            meaning:
+            [noun] A string instrument, typically played with a bow, that has four strings tuned in perfect fifths.
+            ```
+
+            ```txt
+            word: piano
+            meaning:
+            [noun] A large keyboard musical instrument with strings that are struck by hammers when the keys are pressed.
+            ```
+        - role: assistant
+          content: |
+            Violin and piano are both musical instruments that are often used in classical music compositions, but they differ significantly in their playing techniques and sound production methods.
+            ```json
+            {
+                "label": "relative",
+                "content": "Violin and piano are related as musical instruments but differ in their mechanics and roles in music."
+            }
+            ```
+
+        # shot-4
+        - role: user
+          content: |
+            ```txt
+            word: volcano
+            meaning:
+            [noun] A mountain or hill with a vent through which lava, rock fragments, hot vapor, and gas are expelled during an eruption.
+            ```
+
+            ```txt
+            word: refrigerator
+            meaning:
+            [noun] An appliance or compartment that is artificially kept cool and used to store food and drinks.
+            ```
+        - role: assistant
+          content: |
+            Volcano and refrigerator have no inherent connection, as one relates to natural geological phenomena and the other to household appliances.
+            NO_RELA
+
