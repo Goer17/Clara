@@ -1,6 +1,14 @@
 create_rela:
     sys_prompt: |
-        You are an English teacher. I will provide you with two pieces of text, which may contain vocabulary, grammar, or errors commonly made by students.
+        You are an English teacher. I will provide you with two memory items formatted as plain text in the following structure:
+        ```txt
+        label: ...
+        abstract: ...
+        content: ...
+        ```
+        `label`: The category of the memory item, such as "word," "grammar," etc.
+        `abstract`: A brief summary of the memory item. For instance, if the label is "word," the abstract would be the word itself.
+        `content`: The detailed content of the memory item.
         If you think there is a relationship between them, respond with a JSON object in the following format:
         ```json
         { 
@@ -16,15 +24,19 @@ create_rela:
         - role: user
           content: |
             ```txt
-            word: happy
-            meaning:
+            label: word
+            abstract: happy
+            content:
             [adjective] Feeling or showing pleasure or contentment.
+            > I wished her a happy birthday.
             ```
 
             ```txt
-            word: joyful
-            meaning:
+            label: word
+            abstract: joyful
+            content:
             [adjective] Feeling, expressing, or causing great happiness or delight.
+            > We're a very joyful people; we're very musical people and we love music.
             ```
         - role: assistant
           content: |
@@ -40,15 +52,19 @@ create_rela:
         - role: user
           content: |
             ```txt
-            word: meticulous  
-            meaning:  
-            [adjective] Showing great attention to detail; very careful and precise.  
+            label: word
+            abstract: meticulous  
+            content:
+            [adjective] Showing great attention to detail; very careful and precise.
+            > He has been a meticulous manager, a manager par excellence.
             ```
 
             ```txt
-            word: careless  
-            meaning:  
-            [adjective] Not giving sufficient attention or thought to avoiding harm or errors.  
+            label: word
+            abstract: careless
+            content:
+            [adjective] Not giving sufficient attention or thought to avoiding harm or errors.
+            > It was careless of me to leave the door open.
             ```
         - role: assistant
           content: |
@@ -64,15 +80,19 @@ create_rela:
         - role: user
           content: |
             ```txt
-            word: violin
-            meaning:
+            label: word
+            abstract: violin
+            content:
             [noun] A string instrument, typically played with a bow, that has four strings tuned in perfect fifths.
+            > He taught himself to play the violin.
             ```
 
             ```txt
-            word: piano
-            meaning:
+            label: word
+            abstract: piano
+            content:
             [noun] A large keyboard musical instrument with strings that are struck by hammers when the keys are pressed.
+            > McCann tootled a tune on the piano.
             ```
         - role: assistant
           content: |
@@ -88,15 +108,19 @@ create_rela:
         - role: user
           content: |
             ```txt
-            word: volcano
-            meaning:
+            label: word
+            abstract: volcano
+            content:
             [noun] A mountain or hill with a vent through which lava, rock fragments, hot vapor, and gas are expelled during an eruption.
+            > An active volcano may erupt at any time.
             ```
 
             ```txt
-            word: refrigerator
-            meaning:
+            label: word
+            abstract: refrigerator
+            content:
             [noun] An appliance or compartment that is artificially kept cool and used to store food and drinks.
+            > He foraged in the refrigerator for munchies.
             ```
         - role: assistant
           content: |

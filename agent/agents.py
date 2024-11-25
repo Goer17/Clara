@@ -101,9 +101,9 @@ class Retriever(Agent):
         Returns:
             str: memory item ID of `m_item`, empty if failed
         """
-        pass
+        return self.memo.add_item(m_item)
     
-    def __query(self, q_text: str, n_resluts: int = 3) -> List[Dict]:
+    def __query(self, q_text: str, n_resluts) -> List[Dict]:
         """Query the most `n_resluts` relative item of `q_text`
 
         Args:
@@ -113,7 +113,7 @@ class Retriever(Agent):
         Returns:
             List[Dict]: The list of memory item
         """
-        pass
+        return self.memo.query(q_text=q_text, n_results=n_resluts)
     
     def __generate_rela(self, m1: str, m2: str) -> Dict | None:
         rela_prompts = self.all_prompts["create_rela"]
@@ -152,19 +152,21 @@ class Retriever(Agent):
     def __create_rela(self, m1_id: str, m2_id: str) -> Dict:
         m1_item = self.memo.lookup(m_id=m1_id)
         m2_item = self.memo.lookup(m_id=m2_id)
-        m1_con = f"Abstract: {m1_item['abstract']}\nContent: {m1_item['content']}"
-        m2_con = f"Abstract: {m2_item['abstract']}\nContent: {m2_item['content']}"
+        m1_con = f"label: {m1_item['label']}\nabstract: {m1_item['abstract']}\ncontent:\n{m1_item['content']}\n"
+        m2_con = f"label: {m2_item['label']}\nabstract: {m2_item['abstract']}\ncontent:\n{m2_item['content']}\n"
         
         rela = self.__generate_rela(m1=m1_con, m2=m2_con)
-        
-        self.memo.add_rela(m1_id=m1_id, m2_id=m2_id, rela=rela)
+        if rela is not None:
+            self.memo.add_rela(m1_id=m1_id, m2_id=m2_id, rela=rela)
     
-    def remember(self, text_or_m_item: str | Dict):
+    def remember(self, text_or_m_item: str | Dict, rela_number: int = 3):
         if isinstance(text_or_m_item, str):
             m_item = self.__to_m_item(text_or_m_item)
         else:
             m_item = text_or_m_item
         m_id = self.__add_m_item(m_item)
-        relevant_items = self.__query(m_item["abstract"])
+        relevant_items = self.__query(m_item["abstract"], n_resluts=rela_number)
         for item in relevant_items:
-            self.__create_rela(m_id, item["m_id"])
+            # item: (m_id, abstract)
+            if m_id != item[0]:
+                self.__create_rela(m_id, item[0])

@@ -34,9 +34,6 @@ class Memory:
         ) # VectorDB
     
     def __add_item_in_vec_db(self, m_item: dict) -> bool:
-        for key in ["m_id", "abstract"]:
-            if key not in m_item:
-                print(f"Key {key} not found in m_item!")
         try:
             self.collection.add(
                 ids=[m_item["m_id"]],
@@ -53,7 +50,7 @@ class Memory:
         try:
             result = self.collection.query(
                 query_texts=[q_text],
-                n_results=n_results
+                n_results=n_results + 1
             )
             self.logger.info(msg=f"Query: ({q_text}) succeeded!")
             return zip(result['ids'][0], result["documents"][0])
@@ -73,10 +70,6 @@ class Memory:
         return False
     
     def __add_item_in_graph_db(self, m_item: dict) -> bool:
-        for key in ["m_id", "label", "abstract", "content"]:
-            if key not in m_item:
-                print(f"Key {key} not found in m_item!")
-                return False
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
         m_item["creation_time"] = timestamp
         m_item["update_time"] = timestamp
@@ -109,6 +102,11 @@ class Memory:
         except Exception as e:
             self.logger.error(msg=f"Error occurred when adding memory item: {str(m_item)} in graphDB: {str(e)}")
         return False
+    
+    def __merge_item_in_graph_db(self, m_item: dict) -> bool:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+        m_item["update_time"] = timestamp
+        # TODO
         
     
     def __del_item_in_graph_db(self, m_id: str) -> bool:
@@ -146,23 +144,32 @@ class Memory:
                     query=cql_query,
                     parameters=cql_paramters
                 )
-                self.logger.info(msg=f"Found m_item (m_id = {m_id})")
-                return [record.data() for record in result][0]['m']
+                item = result.single()['m']
+                m_item = dict(item)
+                for label in item.labels:
+                    if label != "memory":
+                        m_item['label'] = label
+                self.logger.info(msg=f"Found m_item (m_id = {m_id}): {str(m_item)}")
+                return m_item
         except Exception as e:
-            self.logger.error(msg=f"Error ocurred when looking up m_item (m_id = {m_id}): {str(e)}")
+            tb = e.__traceback__
+            file_name = tb.tb_frame.f_code.co_filename
+            line_number = tb.tb_lineno
+            self.logger.error(msg=f"Error ocurred when looking up m_item (m_id = {m_id}): {file_name}:{line_number} : {e}")
         return {}
                 
 
     def __add_rela_in_graph_db(self, m1_id: str, m2_id: str, rela: dict) -> bool:
         for key in ["label", "content"]:
             if key not in rela:
-                print(f"Key {key} not found in relationship!")
+                self.logger.error(f"Key {key} not found in relationship!")
         label = rela["label"]
         content = rela["content"]
         cql_query = f"""
         MATCH (m1 {{ m_id: $m1_id }})
         MATCH (m2 {{ m_id: $m2_id }})
         CREATE (m1)-[:{label} {{ content: $content }}]->(m2)
+        CREATE (m2)-[:{label} {{ content: $content }}]->(m1)
         """
         try:
             with self.driver.session() as session:
@@ -180,7 +187,11 @@ class Memory:
             self.logger.error(msg=f"Error occurred when adding relationship {str(rela)} between m1(id = {m1_id}) and m2(id = {m2_id}): {str(e)}")
         return False
         
-    def add_item(self, m_item: dict) -> str:
+    def add_item(self, m_item: dict) -> str | None:
+        for key in ["label", "abstract", "content"]:
+            if key not in m_item:
+                self.logger.error(msg=f"Key {key} not found in m_item!")
+                return False
         m_id = uuid()
         m_item["m_id"] = m_id
         try:
@@ -188,12 +199,12 @@ class Memory:
             if not self.__add_item_in_graph_db(m_item):
                 # Roll back
                 self.__del_item_in_vec_db(m_id)
-                return ""
+                return None
             return m_id
         except Exception as e:
-            pass
+            self.logger.error(f"An error occurred when adding memory item: {str(m_item)}")
         
-        return ""
+        return None
 
     def add_rela(self, m1_id: str, m2_id, rela: dict) -> bool:
         return self.__add_rela_in_graph_db(m1_id=m1_id, m2_id=m2_id, rela=rela)
@@ -208,7 +219,7 @@ class Memory:
 
         return True
     
-    def query(self, q_text: str, n_results: int = 5) -> List[Dict]:
+    def query(self, q_text: str, n_results) -> List[Dict]:
         return self.__query_item_in_vec_db(q_text=q_text, n_results=n_results)
     
     def lookup(self, m_id: str) -> dict:
