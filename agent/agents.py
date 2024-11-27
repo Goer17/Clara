@@ -1,6 +1,6 @@
 import yaml, json, re
 from openai import Client
-from typing_extensions import List, Dict
+from typing_extensions import List, Dict, Tuple
 from agent.memory import Memory
 from pathlib import Path
 from logging import getLogger
@@ -70,27 +70,6 @@ class Retriever(Agent):
         retriever_path = Path("agent") / "prompts" / "retriever.yml"
         with open(retriever_path) as f:
             self.all_prompts = yaml.safe_load(f)
-    
-    def __to_m_item(self, text: str) -> Dict:
-        """Encode the plain text to well-structured memory item
-
-        Args:
-            text (str): the plain text
-
-        Returns:
-            Dict: encoded memory item with dict format
-        """
-        pass
-    
-    def __to_m_text(self, m_item: Dict) -> str:
-        """Decode the memory item dictionary to plain text
-
-        Args:
-            m_item (Dict): the memory item
-
-        Returns:
-            str: decoded plain text
-        """
 
     def __add_m_item(self, m_item: Dict) -> str:
         """Add `m_item` to memory module
@@ -103,7 +82,26 @@ class Retriever(Agent):
         """
         return self.memo.add_item(m_item)
     
-    def __query(self, q_text: str, n_resluts) -> List[Dict]:
+    def __merge_item(self, m_id, m_item_dupe: Dict) -> bool:
+        """Merge memory item (m_id) with `m_item_merge`
+
+        Args:
+            m_id (_type_): memory item ID
+            m_item_merge (Dict): merging memory item
+
+        Returns:
+            bool: if the merge operation is successful
+        """
+        # m_item = self.memo.lookup(m_id=m_id)
+        
+        # TODO Merge the content
+        update_item = {
+            "content": m_item_dupe["content"]
+        }
+        
+        return self.memo.update(m_id=m_id, update_item=update_item)
+    
+    def __query(self, q_text: str, n_resluts: int) -> List[Tuple]:
         """Query the most `n_resluts` relative item of `q_text`
 
         Args:
@@ -115,8 +113,8 @@ class Retriever(Agent):
         """
         return self.memo.query(q_text=q_text, n_results=n_resluts)
     
-    def __generate_rela(self, m1: str, m2: str) -> Dict | None:
-        rela_prompts = self.all_prompts["create_rela"]
+    def __generate_rela(self, prompt_name: str, m1: str, m2: str) -> Dict | None:
+        rela_prompts = self.all_prompts[prompt_name]
         prompt = Prompt(
             template=(
                 "```txt\n"
@@ -149,24 +147,55 @@ class Retriever(Agent):
         return None
         
     
-    def __create_rela(self, m1_id: str, m2_id: str) -> Dict:
+    def __create_rela(self, m1_id: str, m2_id: str) -> bool:
         m1_item = self.memo.lookup(m_id=m1_id)
         m2_item = self.memo.lookup(m_id=m2_id)
-        m1_con = f"label: {m1_item['label']}\nabstract: {m1_item['abstract']}\ncontent:\n{m1_item['content']}\n"
-        m2_con = f"label: {m2_item['label']}\nabstract: {m2_item['abstract']}\ncontent:\n{m2_item['content']}\n"
-        
-        rela = self.__generate_rela(m1=m1_con, m2=m2_con)
-        if rela is not None:
-            self.memo.add_rela(m1_id=m1_id, m2_id=m2_id, rela=rela)
-    
-    def remember(self, text_or_m_item: str | Dict, rela_number: int = 3):
-        if isinstance(text_or_m_item, str):
-            m_item = self.__to_m_item(text_or_m_item)
+        label1, label2 = m1_item["label"], m2_item["label"]
+        label_cate = {
+            "word": 0,
+            "unfamiliar_word": 1,
+            "grammar": 2,
+            "image": 3,
+            "passage": 4,
+            "mistake": 5
+        }
+        prompt_name = None
+        if label_cate[label1] in [0, 1] and label_cate[label2] in [0, 1]:
+            prompt_name = "create_rela_word2word"
         else:
-            m_item = text_or_m_item
-        m_id = self.__add_m_item(m_item)
+            pass
+            # prompt_name = "create_rela_others"
+       
+        if prompt_name is None:
+            return False
+        m1_con = f"label: {m1_item['label']} abstract: {m1_item['abstract']}\ncontent:\n{m1_item['content']}\n"
+        m2_con = f"label: {m2_item['label']} abstract: {m2_item['abstract']}\ncontent:\n{m2_item['content']}\n"
+        rela = self.__generate_rela(prompt_name=prompt_name, m1=m1_con, m2=m2_con)
+        if rela is None:
+            return False
+        rela["label"] = rela["label"].lower()
+        if re.match(pattern=r"^[a-z]+$", string=rela["label"]):
+            self.memo.add_rela(m1_id=m1_id, m2_id=m2_id, rela=rela)
+            return True
+        return False
+    
+    def remember(self, m_item: Dict, rela_number: int = 3) -> bool:
+        for key in ["label", "abstract", "content"]:
+            if key not in m_item:
+                # TODO logging
+                return False
+        if m_item["label"] in ["word", "unfamiliar_word"]:
+            m_item["abstract"] = m_item["abstract"].lower()
         relevant_items = self.__query(m_item["abstract"], n_resluts=rela_number)
+        # list[tuple: (m_id, abstract)] 
+        
+        if len(relevant_items) > 0 and relevant_items[0][1].lower() == m_item["abstract"].lower():
+            # duplicate memory
+            return self.__merge_item(relevant_items[0][0], m_item)
+        m_id = self.__add_m_item(m_item) 
         for item in relevant_items:
             # item: (m_id, abstract)
             if m_id != item[0]:
                 self.__create_rela(m_id, item[0])
+        
+        return True

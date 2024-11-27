@@ -4,10 +4,11 @@ from chromadb import PersistentClient
 from shortuuid import uuid
 from datetime import datetime
 
-from typing_extensions import List, Dict
+from typing_extensions import List, Dict, Tuple
 import logging
 
 from pathlib import Path
+import re
 
 class Memory:
     def __init__(self):
@@ -42,20 +43,20 @@ class Memory:
             self.logger.info(msg=f"Added memory item: {str(m_item)} in vectorDB")
             return True
         except Exception as e:
-            self.logger.error(msg=f"Error occurred when adding memory item: {str(m_item)} in vectorDB: {str(e)}")
+            self.logger.error(msg=f"Error occurred when adding memory item: {str(m_item)} in vectorDB: {e}")
         
         return False
     
-    def __query_item_in_vec_db(self, q_text: str, n_results) -> List[Dict]:
+    def __query_item_in_vec_db(self, q_text: str, n_results) -> List[Tuple]:
         try:
             result = self.collection.query(
                 query_texts=[q_text],
-                n_results=n_results + 1
+                n_results=n_results
             )
             self.logger.info(msg=f"Query: ({q_text}) succeeded!")
-            return zip(result['ids'][0], result["documents"][0])
+            return list(zip(result['ids'][0], result["documents"][0]))
         except Exception as e:
-            self.logger.error(msg=f"Error occurred when querying: {q_text}, n_results = {n_results}: {str(e)}")
+            self.logger.error(msg=f"Error occurred when querying: {q_text}, n_results = {n_results}: {e}")
     
     def __del_item_in_vec_db(self, m_id: str) -> bool:
         try:
@@ -80,6 +81,7 @@ class Memory:
             update_time: $update_time,
             abstract: $abstract,
             content: $content,
+            familiarity: $familiarity,
             note: $note
         }} )
         """
@@ -89,6 +91,7 @@ class Memory:
             "update_time",
             "abstract",
             "content",
+            "familiarity",
             "note"
         ] }
         try:
@@ -103,10 +106,30 @@ class Memory:
             self.logger.error(msg=f"Error occurred when adding memory item: {str(m_item)} in graphDB: {str(e)}")
         return False
     
-    def __merge_item_in_graph_db(self, m_item: dict) -> bool:
+    def __update_item_in_graph_db(self, m_id: str, update_item: dict) -> bool:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-        m_item["update_time"] = timestamp
-        # TODO
+        update_item["update_time"] = timestamp
+        cql_query = """
+        MATCH (m:memory { m_id: $m_id })
+        FOREACH (key IN keys($update_item) |
+            SET m[key] = $update_item[key]
+        )
+        """
+        cql_parameters = {
+            "m_id": m_id,
+            "update_item": update_item
+        }
+        try:
+            with self.driver.session() as session:
+                session.run(
+                    query=cql_query,
+                    parameters=cql_parameters
+                )
+            self.logger.info(msg=f"Successfully updated a memory item, updated entry: {update_item}")
+            return True
+        except Exception as e:
+            self.logger.error(msg=f"An error occured when updating memory item (m_id = {m_id}): {e}")
+        return False
         
     
     def __del_item_in_graph_db(self, m_id: str) -> bool:
@@ -152,10 +175,10 @@ class Memory:
                 self.logger.info(msg=f"Found m_item (m_id = {m_id}): {str(m_item)}")
                 return m_item
         except Exception as e:
-            tb = e.__traceback__
-            file_name = tb.tb_frame.f_code.co_filename
-            line_number = tb.tb_lineno
-            self.logger.error(msg=f"Error ocurred when looking up m_item (m_id = {m_id}): {file_name}:{line_number} : {e}")
+            # tb = e.__traceback__
+            # file_name = tb.tb_frame.f_code.co_filename
+            # line_number = tb.tb_lineno
+            self.logger.error(msg=f"Error ocurred when looking up m_item (m_id = {m_id}): {e}")
         return {}
                 
 
@@ -169,7 +192,6 @@ class Memory:
         MATCH (m1 {{ m_id: $m1_id }})
         MATCH (m2 {{ m_id: $m2_id }})
         CREATE (m1)-[:{label} {{ content: $content }}]->(m2)
-        CREATE (m2)-[:{label} {{ content: $content }}]->(m1)
         """
         try:
             with self.driver.session() as session:
@@ -181,10 +203,10 @@ class Memory:
                         "content": content
                     }
                 )
-            self.logger.info(msg=f"Added relationship {str(rela)} between m1(id = {m1_id}) and m2(id = {m2_id})")
+            self.logger.info(msg=f"Added relationship {rela} between m1(id = {m1_id}) and m2(id = {m2_id})")
             return True
         except Exception as e:
-            self.logger.error(msg=f"Error occurred when adding relationship {str(rela)} between m1(id = {m1_id}) and m2(id = {m2_id}): {str(e)}")
+            self.logger.error(msg=f"An Error occurred when adding relationship {rela} between m1(id = {m1_id}) and m2(id = {m2_id}): {e}")
         return False
         
     def add_item(self, m_item: dict) -> str | None:
@@ -209,6 +231,9 @@ class Memory:
     def add_rela(self, m1_id: str, m2_id, rela: dict) -> bool:
         return self.__add_rela_in_graph_db(m1_id=m1_id, m2_id=m2_id, rela=rela)
 
+    def update(self, m_id: str, update_item: Dict) -> bool:
+        return self.__update_item_in_graph_db(m_id=m_id, update_item=update_item)
+    
     def del_item(self, m_id: str) -> bool:
         self.__del_item_in_vec_db(m_id)
         if not self.__del_item_in_graph_db(m_id):

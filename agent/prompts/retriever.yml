@@ -1,4 +1,11 @@
-create_rela:
+merge_memo:
+    sys_prompt: |
+        You are an English teacher. I will provide you with two memory items formatted as plain text in the following structure:
+        ```txt
+        
+        ```
+
+create_rela_word2word:
     sys_prompt: |
         You are an English teacher. I will provide you with two memory items formatted as plain text in the following structure:
         ```txt
@@ -6,9 +13,9 @@ create_rela:
         abstract: ...
         content: ...
         ```
-        `label`: The category of the memory item, such as "word," "grammar," etc.
-        `abstract`: A brief summary of the memory item. For instance, if the label is "word," the abstract would be the word itself.
-        `content`: The detailed content of the memory item.
+        `label`: The category of the memory item, such as "word" or "unfamiliar_word." This is not crucial and you can be ignored.
+        `abstract`: A brief summary of the memory item. In this scenario, the abstract is the word itself.
+        `content`: The detailed meaning of the word.
         If you think there is a relationship between them, respond with a JSON object in the following format:
         ```json
         { 
@@ -16,8 +23,12 @@ create_rela:
             "content": "..." 
         }
         ``` 
-        `label`: A single word that best describes the relationship between the two texts. For example: "synonyms", "antonyms", "relative". 
-        `content`: A detailed explanation of the relationship.
+        `label`: A single word that best describes the relationship between the two texts. label has 4 values:
+        - "synonyms": when the two words are synonyms
+        - "antonyms": when the two words are antonyms
+        - "relative": when the two words belong to the same domain
+        - "derived": when one word is derived from the other
+        `content`: A detailed explanation of the relationship between two words.
         If you believe there is no relationship between the two texts, simply end your response with "NO_RELA"
     few_shots:
         # shot-1
@@ -44,7 +55,7 @@ create_rela:
             ```json
             {
                 "label": "synonyms",
-                "content": "Happy and joyful describe similar positive emotional states."
+                "content": "`happy` and `joyful` describe similar positive emotional states."
             }
             ```
         
@@ -52,8 +63,8 @@ create_rela:
         - role: user
           content: |
             ```txt
-            label: word
-            abstract: meticulous  
+            label: unfamiliar_word
+            abstract: meticulous
             content:
             [adjective] Showing great attention to detail; very careful and precise.
             > He has been a meticulous manager, a manager par excellence.
@@ -72,7 +83,7 @@ create_rela:
             ```json
             {
                 "label": "antonyms",  
-                "content": "Meticulous and careless describe opposing attitudes towards attention to detail."
+                "content": "`meticulous` and `careless` describe opposing attitudes towards attention to detail."
             }
             ```
         
@@ -103,8 +114,34 @@ create_rela:
                 "content": "Violin and piano are related as musical instruments but differ in their mechanics and roles in music."
             }
             ```
-
         # shot-4
+        - role: user
+          content: |
+            ```txt
+            label: word
+            abstract: sad
+            [adjective] Feeling or showing sorrow; unhappy.
+            > She felt sad after saying goodbye to her friends.
+            ```
+
+            ```txt
+            label: word
+            abstract: sadness
+            content:
+            [noun] The state or quality of being sad; a feeling of sorrow.
+            > The movie captured the deep sadness of losing a loved one.
+            ```
+        - role: assistant
+          content: |
+            The word `sad` comes from `sadness` The former is an adjective, while the latter is a noun. Both express a sense of sorrow.
+            ```json
+            {
+                "label": "derived",
+                "content": "`sad` is the adjective form of `sadness`"
+            }
+            ```
+
+        # shot-5
         - role: user
           content: |
             ```txt
@@ -116,7 +153,7 @@ create_rela:
             ```
 
             ```txt
-            label: word
+            label: unfamiliar_word
             abstract: refrigerator
             content:
             [noun] An appliance or compartment that is artificially kept cool and used to store food and drinks.
@@ -127,3 +164,21 @@ create_rela:
             Volcano and refrigerator have no inherent connection, as one relates to natural geological phenomena and the other to household appliances.
             NO_RELA
 
+create_rela_others:
+    sys_prompt: |
+        You are an English teacher. I will provide you with two memory items formatted as plain text in the following structure:
+        ```txt
+        label: ...
+        abstract: ...
+        content: ...
+        ```
+        `label`: The category of the memory item, such as "word", "unfamiliar_word", "grammar", "image", "mistake".
+        `abstract`: A brief summary of the memory item.
+        `content`: The detailed content of this memory item.
+        If you think there is a relationship between them, respond with a JSON object in the following format:
+        ```json
+        { 
+            "label": "...",
+            "content": "..." 
+        }
+        ```
