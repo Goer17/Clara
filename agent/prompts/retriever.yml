@@ -2,8 +2,14 @@ merge_memo:
     sys_prompt: |
         You are an English teacher. I will provide you with two memory items formatted as plain text in the following structure:
         ```txt
-        
+        label: ...
+        abstract: ...
+        content: ...
         ```
+        `label`: The category of the memory item, such as "word", "unfamiliar_word", "grammar", "image" and "mistake".
+        `abstract`: A brief summary of the memory item. In this scenario, the abstract is the word itself.
+        `content`: The detailed meaning of the word.
+        Now I wish you to merge them.
 
 create_rela_word2word:
     sys_prompt: |
@@ -13,7 +19,7 @@ create_rela_word2word:
         abstract: ...
         content: ...
         ```
-        `label`: The category of the memory item, such as "word" or "unfamiliar_word." This is not crucial and you can be ignored.
+        `label`: The category of the memory item, such as "word" or "unfamiliar_word" This is not crucial and you can be ignored.
         `abstract`: A brief summary of the memory item. In this scenario, the abstract is the word itself.
         `content`: The detailed meaning of the word.
         If you think there is a relationship between them, respond with a JSON object in the following format:
@@ -24,9 +30,9 @@ create_rela_word2word:
         }
         ``` 
         `label`: A single word that best describes the relationship between the two texts. label has 4 values:
+        - "relative": when two words belong to the same domain or have some kind of relationship. It is the most common label
         - "synonyms": when the two words are synonyms
         - "antonyms": when the two words are antonyms
-        - "relative": when the two words belong to the same domain
         - "derived": when one word is derived from the other
         `content`: A detailed explanation of the relationship between two words.
         If you believe there is no relationship between the two texts, simply end your response with "NO_RELA"
@@ -114,6 +120,7 @@ create_rela_word2word:
                 "content": "Violin and piano are related as musical instruments but differ in their mechanics and roles in music."
             }
             ```
+
         # shot-4
         - role: user
           content: |
@@ -175,10 +182,44 @@ create_rela_others:
         `label`: The category of the memory item, such as "word", "unfamiliar_word", "grammar", "image", "mistake".
         `abstract`: A brief summary of the memory item.
         `content`: The detailed content of this memory item.
-        If you think there is a relationship between them, respond with a JSON object in the following format:
+        If you think there is a relationship between them, please explain your reasoning and respond with a JSON object in the following format:
         ```json
         { 
-            "label": "...",
             "content": "..." 
         }
         ```
+        `content`: A detailed explanation of the relationship between two items.
+        If you believe there is no relationship between the two texts, simply end your response with "NO_RELA"
+
+    few_shots:
+        # shot-1
+        - role: user
+          content: |
+            ```txt
+            label: word
+            abstract: inundate
+            content:
+            [verb] to overwhelm someone with things to be done or to flood.
+            > The office was inundated with phone calls after the announcement.
+            > The heavy rains inundated the small village.
+            ```
+
+            ```txt
+            label: grammar
+            abstract: be inundated with
+            content:
+            The phrase "be inundated with" means to be overwhelmed or flooded with a large amount of something, such as tasks or emotions.
+            It is often used to describe situations where someone is overwhelmed by an excessive quantity of something.
+            > She was inundated with work during the holiday season.
+            > The company was inundated with customer complaints after the product launch.
+            ```
+        - role: assistant
+          content: |
+            The phrase "be inundated with" comes from the verb "inundate". So, my response is:
+            ```json
+            {
+                "content": "`be inundated with` comes from the verb `inundate`"
+            }
+            ```
+
+          

@@ -5,10 +5,8 @@ from shortuuid import uuid
 from datetime import datetime
 
 from typing_extensions import List, Dict, Tuple
-import logging
 
-from pathlib import Path
-import re
+from utils.logger import logger
 
 class Memory:
     def __init__(self):
@@ -16,18 +14,7 @@ class Memory:
         username = "neo4j"
         password = "Yy030518neo4j"
         self.driver = GraphDatabase.driver(uri, auth=(username, password)) # GraphDB
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.WARNING)
-        self.logger.addHandler(console_handler)
-        
-        log_path = Path('logs') / "memory"
-        file_handler = logging.FileHandler(log_path / f"{datetime.now().strftime('%Y-%m-%d')}.log")
-        file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        file_handler.setFormatter(formatter)
-        self.logger.addHandler(file_handler)
+        self.logger = logger
 
         chroma_client = PersistentClient()
         self.collection = chroma_client.get_or_create_collection(
@@ -264,6 +251,7 @@ class Memory:
                     MATCH (n) DETACH DELETE n
                     """
                 )
-            self.logger.info(msg="All items was removed!")
+            self.logger.info(msg="All items in graphDB were removed!")
+            self.logger.info(msg="All items were removed!")
         except Exception as e:
-            pass
+            self.logger.error(msg="An error were occurred when removing all memory items")

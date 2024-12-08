@@ -1,72 +1,21 @@
-import yaml, json, re
-from openai import Client
-from typing_extensions import List, Dict, Tuple
-from agent.memory import Memory
+import json, yaml, re
+from typing import (
+    List, Dict, Tuple
+)
 from pathlib import Path
-from logging import getLogger
 
-class Prompt:
-    def __init__(self, template: str, parameters: dict):
-        self.template = template
-        self.parameters = parameters
-        self.__value = None
+from .memory import (
+    Memory
+)
+from .general import (
+    Prompt,
+    LLMEngine
+)
 
-    @property
-    def value(self):
-        if self.__value is not None:
-            return self.__value
-        result = self.template
-        for key, content in self.parameters.items():
-            result = result.replace(f"${key}", content)
-        self.__value = result
-        
-        return result
-
-
-class Agent:
-    def __init__(self, model: str, api_key: str, base_url: str):
-        self.model = model
-        self.client = Client(
-            api_key=api_key,
-            base_url=base_url
-        )
-        
-    def generate(self, prompt: str | Prompt | None = None, sys_prompt: str | Prompt | None = None, few_shots: List[Dict] | None = None):
-        messages = []
-        if sys_prompt:
-            messages.append(
-                {
-                    "role": "system",
-                    "content": sys_prompt.value if isinstance(sys_prompt, Prompt) else sys_prompt
-                }
-            )
-        for shot in few_shots:
-            messages.append(
-                {
-                    "role": shot["role"],
-                    "content": shot["content"]
-                }
-            )
-        if prompt:
-            messages.append(
-                {
-                    "role": "user",
-                    "content": prompt.value if isinstance(prompt, Prompt) else prompt
-                }
-            )
-        
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages
-        ).choices[0].message.content
-        return response
-
-
-
-class Retriever(Agent):
-    def __init__(self, model, api_key, base_url):
-        super().__init__(model, api_key, base_url)
+class Retriever:
+    def __init__(self, engine: LLMEngine):
         self.memo = Memory()
+        self.engine = engine
         retriever_path = Path("agent") / "prompts" / "retriever.yml"
         with open(retriever_path) as f:
             self.all_prompts = yaml.safe_load(f)
@@ -129,7 +78,7 @@ class Retriever(Agent):
                 "m2": m2
             }
         )
-        response = self.generate(
+        response = self.engine.generate(
             prompt=prompt,
             sys_prompt=rela_prompts["sys_prompt"],
             few_shots=rela_prompts["few_shots"]
@@ -163,8 +112,7 @@ class Retriever(Agent):
         if label_cate[label1] in [0, 1] and label_cate[label2] in [0, 1]:
             prompt_name = "create_rela_word2word"
         else:
-            pass
-            # prompt_name = "create_rela_others"
+            prompt_name = "create_rela_others"
        
         if prompt_name is None:
             return False
@@ -173,6 +121,8 @@ class Retriever(Agent):
         rela = self.__generate_rela(prompt_name=prompt_name, m1=m1_con, m2=m2_con)
         if rela is None:
             return False
+        if "label" not in rela:
+            rela["label"] = "relative"
         rela["label"] = rela["label"].lower()
         if re.match(pattern=r"^[a-z]+$", string=rela["label"]):
             self.memo.add_rela(m1_id=m1_id, m2_id=m2_id, rela=rela)
@@ -189,7 +139,7 @@ class Retriever(Agent):
         relevant_items = self.__query(m_item["abstract"], n_resluts=rela_number)
         # list[tuple: (m_id, abstract)] 
         
-        if len(relevant_items) > 0 and relevant_items[0][1].lower() == m_item["abstract"].lower():
+        if relevant_items and len(relevant_items) > 0 and relevant_items[0][1].lower() == m_item["abstract"].lower():
             # duplicate memory
             return self.__merge_item(relevant_items[0][0], m_item)
         m_id = self.__add_m_item(m_item) 
