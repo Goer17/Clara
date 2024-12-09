@@ -8,10 +8,17 @@ from pathlib import Path
 import json
 from functools import wraps
 from typing import get_type_hints
+from collections import defaultdict
 
 load_dotenv(find_dotenv())
 base_url = os.environ["BASE_URL"]
 openai_api_key = os.environ["OPENAI_API_KEY"]
+
+engine = LLMEngine(
+        model='gpt-4o-mini',
+        api_key=openai_api_key,
+        base_url=base_url
+    )
 
 def cast_arguments(func):
     @wraps(func)
@@ -47,11 +54,6 @@ def clear_all():
 
 @cast_arguments
 def remember_voc(max_line: int = -1):
-    engine = LLMEngine(
-        model='gpt-4o-mini',
-        api_key=openai_api_key,
-        base_url=base_url
-    )
     retriver = Retriever(
         engine=engine
     )
@@ -71,11 +73,6 @@ def remember_voc(max_line: int = -1):
 
 @cast_arguments
 def remember_unfamiliar_voc(max_line: int = -1):
-    engine = LLMEngine(
-        model='gpt-4o-mini',
-        api_key=openai_api_key,
-        base_url=base_url
-    )
     retriver = Retriever(
         engine=engine
     )
@@ -93,6 +90,21 @@ def remember_unfamiliar_voc(max_line: int = -1):
             line_idx += 1
             if max_line > 0 and line_idx >= max_line:
                 break
+
+@cast_arguments
+def find_neighbors():
+    retriver = Retriever(
+        engine=engine
+    )
+    m_id = "R4UwC9LNVtwiKcKkvi2GYZ"
+    p, pn = retriver.lookup(m_id=m_id, limit=10)
+    print(f"word: {p['abstract']}\nmeaning:\n{p['content']}")
+    rela_d = defaultdict(list)
+    for nd in pn:
+        rela_d[nd["rela"]["label"]].append(nd["m_item"]["abstract"])
+    for rela in rela_d:
+        print(f"{rela}: {', '.join(rela_d[rela])}")
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

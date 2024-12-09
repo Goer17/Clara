@@ -129,6 +129,9 @@ class Retriever:
             return True
         return False
     
+    def lookup(self, m_id: str, limit: int = 5) -> Tuple[Dict, List[Dict]]:
+        return self.memo.lookup_with_neighbors(m_id=m_id, limit=limit)
+    
     def remember(self, m_item: Dict, rela_number: int = 3) -> bool:
         for key in ["label", "abstract", "content"]:
             if key not in m_item:
@@ -149,3 +152,5 @@ class Retriever:
                 self.__create_rela(m_id, item[0])
         
         return True
+    
+    

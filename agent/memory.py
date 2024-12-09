@@ -140,9 +140,9 @@ class Memory:
         
         return False
 
-    def __lookup_item_in_graph_db(self, m_id: str) -> dict:
+    def __lookup_item_in_graph_db(self, m_id: str) -> Dict:
         cql_query = """
-        MATCH (m { m_id: $m_id } )
+        MATCH (m:memory { m_id: $m_id } )
         RETURN m
         """
         cql_paramters = {
@@ -162,12 +162,47 @@ class Memory:
                 self.logger.info(msg=f"Found m_item (m_id = {m_id}): {str(m_item)}")
                 return m_item
         except Exception as e:
-            # tb = e.__traceback__
-            # file_name = tb.tb_frame.f_code.co_filename
-            # line_number = tb.tb_lineno
             self.logger.error(msg=f"Error ocurred when looking up m_item (m_id = {m_id}): {e}")
         return {}
-                
+    
+    def __lookup_neighbors_in_graph_db(self, m_id: str, limit: int = 5) -> List[Dict]:
+        cql_query = """
+        MATCH (m:memory { m_id: $m_id })
+        MATCH (i)-[r]-(m)
+        RETURN i, r
+        LIMIT $limit
+        """
+        cql_parameters = {
+            "m_id": m_id,
+            "limit": limit
+        }
+        try:
+            with self.driver.session() as session:
+                results = session.run(
+                    query=cql_query,
+                    parameters=cql_parameters
+                )
+                ans = []
+                for result in results:
+                    o_item = result["i"]
+                    o_rela = result["r"]
+
+                    m_item = dict(o_item)
+                    for label in o_item.labels:
+                        if label != "memory":
+                            m_item["label"] = label
+                    rela = dict(o_rela)
+                    rela["label"] = o_rela.type
+                    ans.append(
+                        {
+                            "m_item": m_item,
+                            "rela": rela
+                        }
+                    )
+                return ans
+        except Exception as e:
+            self.logger.error(msg=f"An error occurred when searching the neibour of node (m_id = {m_id}): {e}")
+        return []
 
     def __add_rela_in_graph_db(self, m1_id: str, m2_id: str, rela: dict) -> bool:
         for key in ["label", "content"]:
@@ -182,7 +217,7 @@ class Memory:
         """
         try:
             with self.driver.session() as session:
-                res = session.run(
+                session.run(
                     query=cql_query,
                     parameters={
                         "m1_id": m1_id,
@@ -234,8 +269,14 @@ class Memory:
     def query(self, q_text: str, n_results) -> List[Dict]:
         return self.__query_item_in_vec_db(q_text=q_text, n_results=n_results)
     
-    def lookup(self, m_id: str) -> dict:
+    def lookup(self, m_id: str) -> Dict:
         return self.__lookup_item_in_graph_db(m_id=m_id)
+    
+    def lookup_with_neighbors(self, m_id: str, limit: int = 5) -> Tuple[Dict, List[Dict]]:
+        m_item = self.__lookup_item_in_graph_db(m_id=m_id)
+        neighbors = self.__lookup_neighbors_in_graph_db(m_id=m_id, limit=limit)
+        
+        return m_item, neighbors
     
     def clear_all(self):
         """

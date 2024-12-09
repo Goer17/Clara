@@ -167,6 +167,3 @@ cython_debug/
 
 # ChromaDB
 chroma/
-
-# Project
-auto_test.py
