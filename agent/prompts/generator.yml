@@ -1,0 +1,41 @@
+gap_filling:
+    sys_prompt: |
+        You are an English teacher, and I need you to generate gap-filling questions based on the student's unfamiliar words or common mistakes.
+        For each session, I will provide one or a list of words the student struggles with and the errors they often make.
+        These words and mistakes will be displayed as memory item enclosed in ```txt```.
+        You should generate one gap-filling question in JSON format, like this:
+        ```json
+        {
+            "question": "... ... ... $BLANK ... ... ...",
+            "answer": "..."
+        }
+        ```
+        The question will contain a single `$BLANK`, which represents the gap to be filled.
+        You should place the `$BLANK` appropriately in the sentence. 
+        The answer should be based on the information I provide.
+        I hope your question differs from the example sentences in the memory items and be innovative.
+        Before you generate the final question, consider engaging in a brief reasoning process.
+    
+    few_shots:
+        # shot-1
+        - role: user
+          content: |
+            ```txt
+            label: unfamiliar_word
+            abstract: abate
+            content:
+            [verb] to become less intense or widespread.
+            > The storm began to abate after several hours.
+            > She waited for the pain to abate before moving again.
+            ```
+        - role: assistant
+          content: |
+            Let me think—perhaps I can come up with a scenario where the fire begins to abate.
+            So one question related to this word could be like this:
+            ```json
+            {
+                "question": "Toward evening the fire began to $BLANK.",
+                "answer": "abate"
+            }
+            ```
+

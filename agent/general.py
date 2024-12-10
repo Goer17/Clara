@@ -28,7 +28,8 @@ class LLMEngine:
             base_url=base_url
         )
         
-    def generate(self, prompt: str | Prompt | None = None, sys_prompt: str | Prompt | None = None, few_shots: List[Dict] | None = None):
+    def generate(self, prompt: str | Prompt | None = None, sys_prompt: str | Prompt | None = None, few_shots: List[Dict] | None = None,
+                 *args, **kwargs):
         messages = []
         if sys_prompt:
             messages.append(
@@ -54,6 +55,7 @@ class LLMEngine:
         
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=messages
+            messages=messages,
+            *args, **kwargs
         ).choices[0].message.content
         return response

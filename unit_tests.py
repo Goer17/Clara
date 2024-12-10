@@ -4,6 +4,10 @@ import argparse
 from agent.memory import Memory
 from agent.general import LLMEngine
 from agent.retriever import Retriever
+from agent.generator import (
+    Question,
+    Generator
+)
 from pathlib import Path
 import json
 from functools import wraps
@@ -104,6 +108,23 @@ def find_neighbors():
         rela_d[nd["rela"]["label"]].append(nd["m_item"]["abstract"])
     for rela in rela_d:
         print(f"{rela}: {', '.join(rela_d[rela])}")
+    
+
+@cast_arguments
+def gap_filling():
+    memory = Memory()
+    results = memory.lookup_same_label(
+        label="word",
+        limit=5,
+        order={
+            "by": "abstract",
+            "method": "asc"
+        }
+    )
+    generator = Generator(engine=engine)
+    question = generator.gen_gap_filling(rela_m_items=[results[2]])
+    print(question.show_que(hint=True))
+    print("Solution: " + question.show_sol())
     
 
 if __name__ == "__main__":
