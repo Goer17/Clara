@@ -1,6 +1,6 @@
 from pathlib import Path
 import yaml, json, re
-from .general import (
+from utils.general import (
     LLMEngine
 )
 from typing_extensions import (
@@ -20,7 +20,7 @@ from .memory import (
 class Generator:
     def __init__(self, engine: LLMEngine):
         self.engine = engine
-        config_path = Path("agent") / "prompts" / "generator.yml"
+        config_path = Path("config") / "prompts" / "generator.yml"
         self.prompts_cfg = {}
         with open(config_path) as f:
             config = yaml.safe_load(f)

@@ -9,3 +9,7 @@
 </div>
 
 
+#### Todo List
+
+- [ ] Implement the ORM Model of Neo4j
+- [ ] Other question : sentence-making & listening

@@ -2,7 +2,11 @@ import os
 from dotenv import find_dotenv, load_dotenv
 import argparse
 from agent.memory import Memory
-from agent.general import LLMEngine
+from utils.general import LLMEngine
+from utils.dictionary import (
+    to_text,
+    LLMDictionary
+)
 from agent.retriever import Retriever
 from agent.generator import (
     Question,
@@ -19,10 +23,10 @@ base_url = os.environ["BASE_URL"]
 openai_api_key = os.environ["OPENAI_API_KEY"]
 
 engine = LLMEngine(
-        model='gpt-4o-mini',
-        api_key=openai_api_key,
-        base_url=base_url
-    )
+    model='gpt-4o',
+    api_key=openai_api_key,
+    base_url=base_url
+)
 
 def cast_arguments(func):
     @wraps(func)
@@ -96,21 +100,6 @@ def remember_unfamiliar_voc(max_line: int = -1):
                 break
 
 @cast_arguments
-def find_neighbors():
-    retriver = Retriever(
-        engine=engine
-    )
-    m_id = "R4UwC9LNVtwiKcKkvi2GYZ"
-    p, pn = retriver.lookup(m_id=m_id, limit=10)
-    print(f"word: {p['abstract']}\nmeaning:\n{p['content']}")
-    rela_d = defaultdict(list)
-    for nd in pn:
-        rela_d[nd["rela"]["label"]].append(nd["m_item"]["abstract"])
-    for rela in rela_d:
-        print(f"{rela}: {', '.join(rela_d[rela])}")
-    
-
-@cast_arguments
 def gap_filling():
     memory = Memory()
     results = memory.lookup_same_label(
@@ -126,6 +115,13 @@ def gap_filling():
     print(question.show_que(hint=True))
     print("Solution: " + question.show_sol())
     
+@cast_arguments
+def test_dict():
+    dictionary = LLMDictionary(engine=engine)
+    meanings = dictionary("example")
+    if meanings is not None:
+        meanings = to_text(meanings)
+        print(meanings)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

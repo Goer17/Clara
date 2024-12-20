@@ -1,4 +1,4 @@
-from .general import (
+from utils.general import (
     LLMEngine
 )
 

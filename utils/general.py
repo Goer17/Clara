@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv, find_dotenv
 from openai import Client
 from typing_extensions import (
     List, Dict
@@ -59,3 +61,14 @@ class LLMEngine:
             *args, **kwargs
         ).choices[0].message.content
         return response
+
+load_dotenv(find_dotenv())
+
+openai_api_key = os.environ["OPENAI_API_KEY"]
+base_url = os.environ["BASE_URL"]
+
+gpt_4o_engine = LLMEngine(
+    model="gpt-4o",
+    api_key=openai_api_key,
+    base_url=base_url
+)

@@ -7,7 +7,7 @@ from pathlib import Path
 from .memory import (
     Memory
 )
-from .general import (
+from utils.general import (
     Prompt,
     LLMEngine
 )
@@ -16,7 +16,7 @@ class Retriever:
     def __init__(self, engine: LLMEngine):
         self.memo = Memory()
         self.engine = engine
-        retriever_path = Path("agent") / "prompts" / "retriever.yml"
+        retriever_path = Path("config") / "prompts" / "retriever.yml"
         with open(retriever_path) as f:
             self.all_prompts = yaml.safe_load(f)
 
@@ -48,7 +48,8 @@ class Retriever:
             "content": m_item_dupe["content"]
         }
         
-        return self.memo.update(m_id=m_id, update_item=update_item)
+        return True
+        # return self.memo.update(m_id=m_id, update_item=update_item)
     
     def __query(self, q_text: str, n_resluts: int) -> List[Tuple]:
         """Query the most `n_resluts` relative item of `q_text`
@@ -131,6 +132,12 @@ class Retriever:
     
     def lookup(self, m_id: str, limit: int = 5) -> Tuple[Dict, List[Dict]]:
         return self.memo.lookup_with_neighbors(m_id=m_id, limit=limit)
+
+    def lookup_same_label(self, label: str, limit: int = 25, order: Dict | None = None) -> List[Dict] | None:
+        return self.memo.lookup_same_label(label=label, limit=limit, order=order)
+    
+    def update(self, m_id: str, update_item: Dict) -> bool:
+        return self.memo.update(m_id=m_id, update_item=update_item)
     
     def remember(self, m_item: Dict, rela_number: int = 3) -> bool:
         for key in ["label", "abstract", "content"]:

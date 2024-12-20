@@ -95,12 +95,23 @@ class Memory:
     def __update_item_in_graph_db(self, m_id: str, update_item: dict) -> bool:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
         update_item["update_time"] = timestamp
+        label = None
+        if "label" in update_item:
+            label = update_item.pop("label")
         cql_query = """
         MATCH (m:memory { m_id: $m_id })
         FOREACH (key IN keys($update_item) |
             SET m[key] = $update_item[key]
         )
         """
+        if label is not None:
+            cql_query += f"""
+            WITH m, labels(m) AS lbls
+            FOREACH (lbl IN lbls |
+                REMOVE m:$(lbl)
+            )
+            SET m:memory, m:{label}
+            """
         cql_parameters = {
             "m_id": m_id,
             "update_item": update_item
@@ -291,11 +302,11 @@ class Memory:
     def update(self, m_id: str, update_item: Dict) -> bool:
         return self.__update_item_in_graph_db(m_id=m_id, update_item=update_item)
     
-    def del_item(self, m_id: str) -> bool:
+    def del_m_item(self, m_id: str) -> bool:
         self.__del_item_in_vec_db(m_id)
+        m_item = self.__lookup_item_in_graph_db(m_id)
         if not self.__del_item_in_graph_db(m_id):
             # Roll back
-            m_item = self.__lookup_item_in_graph_db(m_id)
             self.__add_item_in_vec_db(m_item)
             return False
 
@@ -323,7 +334,8 @@ class Memory:
         try:
             m_ids = self.collection.get()["ids"]
             for m_id in m_ids:
-                self.__del_item_in_vec_db(m_id)
+                self.del_m_item(m_id)
+            # check in Graph DB
             with self.driver.session() as session:
                 session.run(
                     query="""
