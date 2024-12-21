@@ -123,6 +123,17 @@ def test_dict():
         meanings = to_text(meanings)
         print(meanings)
 
+@cast_arguments
+def test_orm():
+    from utils.neo4j_orm import Graph, Node
+    graph = Graph(
+        uri="bolt://localhost:7687",
+        auth=("neo4j", "Yy030518neo4j")
+    )
+    nodes = graph.match_node(labels=["word"], properties={"abstract" : "spankee"})
+    for node in nodes:
+        print(node.properties)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--function", type=str, help="The function you are going to test.")

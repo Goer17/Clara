@@ -4,7 +4,7 @@ from chromadb import PersistentClient
 from shortuuid import uuid
 from datetime import datetime
 
-from typing_extensions import List, Dict, Tuple
+from typing import List, Dict, Tuple
 
 from utils.logger import logger
 
