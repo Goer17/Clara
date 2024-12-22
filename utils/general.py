@@ -1,9 +1,11 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 from openai import Client
 from typing_extensions import (
     List, Dict
 )
+from .logger import logger
 
 class Prompt:
     def __init__(self, template: str, parameters: dict):
@@ -62,13 +64,64 @@ class LLMEngine:
         ).choices[0].message.content
         return response
 
+from playsound import playsound
+import hashlib
+
+class AMEngine:
+    cache_path = Path("cache") / "audio"
+
+    def __init__(self, model: str, api_kay: str, base_url):
+        self.client = Client(
+            api_key=api_kay,
+            base_url=base_url
+        )
+        self.model = model
+
+    def generate(self, text: str, voice: str) -> str:
+        tag = f"[{voice}] : {text}".encode('utf-8')
+        name = f"audio[{hashlib.md5(tag).hexdigest()}]"
+        filename = f"{name}.mp3"
+        if not os.path.exists(AMEngine.cache_path):
+            os.makedirs(path=AMEngine.cache_path)
+        path = self.cache_path / filename
+        if os.path.exists(path):
+            return name
+        response = self.client.audio.speech.create(
+            model=self.model,
+            voice=voice,
+            input=text
+        )
+        response.write_to_file(path)
+
+        return name
+        
+    @staticmethod
+    def play(name: str):
+        path = AMEngine.cache_path / f"{name}.mp3"
+        try:
+            playsound(path)
+        except Exception as e:
+            logger.error(f"AMEgine : An error occurred when play the mp3 file: {path}")
+
 load_dotenv(find_dotenv())
 
 openai_api_key = os.environ["OPENAI_API_KEY"]
 base_url = os.environ["BASE_URL"]
 
-gpt_4o_engine = LLMEngine(
+gpt_4o = LLMEngine(
     model="gpt-4o",
     api_key=openai_api_key,
+    base_url=base_url
+)
+
+tts = AMEngine(
+    model="tts-1",
+    api_kay=openai_api_key,
+    base_url=base_url
+)
+
+tts_hd = AMEngine(
+    model="tts-1-hd",
+    api_kay=openai_api_key,
     base_url=base_url
 )

@@ -53,3 +53,9 @@ class Generator:
         except Exception as e:
             logger.error(f"Generator : An error occurred when generating gap filling questions: {e}")
         return None
+    
+    def gen_sentence_making(self, rela_m_items: List[Dict]):
+        pass
+    
+    def gen_listening(self, rela_m_items: List[Dict]):
+        pass

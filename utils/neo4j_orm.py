@@ -145,13 +145,6 @@ class Graph:
         except Exception as e:
             pass
         return False
-    
-    def create_rela(
-        self,
-        label: str,
-        properties: Dict
-    ) -> 'Relationship':
-        pass
 
 class Node:
     def __init__(self):
@@ -227,6 +220,16 @@ class Node:
         return True
     
     @ensure_node_alive
+    def create_rela(self, to: 'Node', label: 'str', content: 'str') -> bool:
+        # TODO
+        pass
+    
+    @ensure_node_alive
+    def neighbors(self) -> List[Tuple['Node', 'Relationship']]:
+        # TODO
+        pass
+    
+    @ensure_node_alive
     def destroy(self) -> bool:
         if self.__graph._delete_node(self.m_id):
             self._alive = False
@@ -235,4 +238,18 @@ class Node:
 
 class Relationship:
     def __init__(self):
+        self.__graph: Graph = None
+        self.r_id = None
+        self.label = None
+        self._properties = None
+        self._alive = False
+        self._new_properties = {}
+        self._removed_properties = []
+        raise RuntimeError("Use Node.create_rela to get a Relationship instance")
+    
+    @classmethod
+    def _create():
         pass
+    
+    
+    
