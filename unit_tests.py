@@ -124,15 +124,24 @@ def test_dict():
         print(meanings)
 
 @cast_arguments
-def test_orm():
-    from utils.neo4j_orm import Graph, Node
-    graph = Graph(
-        uri="bolt://localhost:7687",
-        auth=("neo4j", "Yy030518neo4j")
-    )
-    nodes = graph.match_node(labels=["word"], properties={"abstract" : "spankee"})
-    for node in nodes:
-        print(node.properties)
+def test_add():
+    # ✅
+    m_item = {
+        "label": "word",
+        "abstract": "apple",
+        "content": "one kind of fruit"
+    }
+    memory = Memory()
+    memory.add_item(m_item)
+
+@cast_arguments
+def test_del():
+    # ✅
+    memory = Memory()
+    m_id = input()
+    memory.del_m_item(m_id)
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -76,8 +76,11 @@ class ShellApp:
                     m_id, familiarity = m_item["m_id"], m_item["familiarity"]
                     if mark == 1:
                         familiarity += 20
+                        print("* correct!")
                     elif mark == 0:
                         familiarity -= 20
+                        print(f"* right answer : {m_item['abstract']}")
+                        print(m_item['content'])
                     update_item = {
                         "familiarity": familiarity
                     }

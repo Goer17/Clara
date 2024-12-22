@@ -360,3 +360,6 @@ class Memory:
         )
         
         return string
+
+class ORMMemory:
+    pass

@@ -132,9 +132,6 @@ class Retriever:
     
     def lookup(self, m_id: str, limit: int = 5) -> Tuple[Dict, List[Dict]]:
         return self.memo.lookup_with_neighbors(m_id=m_id, limit=limit)
-
-    def lookup_same_label(self, label: str, limit: int = 25, order: Dict | None = None) -> List[Dict] | None:
-        return self.memo.lookup_same_label(label=label, limit=limit, order=order)
     
     def update(self, m_id: str, update_item: Dict) -> bool:
         return self.memo.update(m_id=m_id, update_item=update_item)
