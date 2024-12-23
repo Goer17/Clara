@@ -139,15 +139,33 @@ def test_audio():
     AMEngine.play(a_id)
 
 @cast_arguments
-def test_orm():
+def test_orm_add():
     from utils.neo4j_orm import Graph, Node, Relationship
     graph = Graph(uri="bolt://localhost:7687", auth=("neo4j", "Yy030518neo4j"))
     node1 = graph.create_node(label="word", properties={"abstract": "apple"})
     node2 = graph.create_node(label="word", properties={"abstract": "banana"})
-    rela = node1.create_rela(to=node2, label="relative", properties={"content": "They are all fruits."})
-    print(rela)
+    node3 = graph.create_node(label="word", properties={"abstract": "melon"})
+    rela1 = node1.create_rela(to=node2, label="relative", properties={"content": "fruits"})
+    rela2 = node2.create_rela(to=node3, label="relative", properties={"content": "fruits"})
+    rela1.set_prop("distance", 10)
+    rela1.update()
+    rela2.set_prop("distance", 20)
+    rela2.update()
     
-    
+@cast_arguments
+def test_orm_del():
+    from utils.neo4j_orm import Graph, Node, Relationship
+    graph = Graph(uri="bolt://localhost:7687", auth=("neo4j", "Yy030518neo4j"))
+    res = graph.match(
+        from_prop={"label": "word", "abstract": "melon"},
+        to_prop={"label": "word", "abstract": "banana"},
+        rela_prop={"label": "relative"},
+        bidirect=True
+    )
+    if len(res) == 0:
+        return
+    p, r, q = res[0]
+    r.destroy()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

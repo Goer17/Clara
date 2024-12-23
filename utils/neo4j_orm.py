@@ -101,7 +101,7 @@ class Graph:
             new_labels: List[str] = [],
             new_properties: Dict = {},
             removed_properties: List[str] = []
-        ) -> bool:
+        ):
         query = (
             f"MATCH (p {{ m_id: '{m_id}' }})\n"
             f"FOREACH (label IN labels(p) | REMOVE p:$(label))\n"
@@ -114,35 +114,24 @@ class Graph:
             "new_properties" : new_properties,
             "removed_properties": removed_properties
         }
-        try:
-            with self.__driver.session() as session:
-                session.run(
-                    query=query,
-                    parameters=parameters
-                )
-            return True
-        except Exception as e:
-            pass
-        
-        return False
+        with self.__driver.session() as session:
+            session.run(
+                query=query,
+                parameters=parameters
+            )
 
     def _delete_node(
             self,
             m_id: str
-        ) -> bool:
+        ):
         query = (
             f"MATCH (p:memory {{ m_id: '{m_id}' }})\n"
             f"DETACH DELETE p\n"
         )
-        try:
-            with self.__driver.session() as session:
-                session.run(
-                    query=query
-                )
-            return True
-        except Exception as e:
-            pass
-        return False
+        with self.__driver.session() as session:
+            session.run(
+                query=query
+            )
     
     def _create_rela(
             self,
@@ -177,14 +166,107 @@ class Graph:
         )
         return rela
 
-    def _match_rela(
+    def match(
             self,
-            from_node_prop: Dict[str, str | int | float] = {},
-            to_node_prop: Dict[str, str | int | float] = {},
-            r_id: str | None = None,
-            properties: Dict[str, str | int | float] = {}
-        ) -> List['Relationship']:
-        pass
+            from_prop: Dict[str, str | int | float] = {},
+            to_prop: Dict[str, str | int | float] = {},
+            rela_prop: Dict[str, str | int | float] = {},
+            bidirect: bool = False
+        ) -> List[Tuple['Node', 'Relationship', 'Node']]:
+        from_labels = ["memory"]
+        to_labels = ["memory"]
+        if "label" in from_prop:
+            from_labels.append(from_prop.pop("label"))
+        if "label" in to_prop:
+            to_labels.append(to_prop.pop("label"))
+        _from_labels = ":".join(from_labels)
+        _from_prop = Graph.json_dumps(from_prop)
+        _to_labels = ":".join(to_labels)
+        _to_prop = Graph.json_dumps(to_prop)
+        _r_label = ":" + rela_prop.pop("label") if "label" in rela_prop else ""
+        _rela_prop = Graph.json_dumps(rela_prop)
+        arrow = "->" if not bidirect else "-"
+        query = (
+            f"MATCH (p:{_from_labels} {_from_prop})\n"
+            f"MATCH (q:{_to_labels} {_to_prop})\n"
+            f"MATCH (p)-[r{_r_label} {_rela_prop}]{arrow}(q)\n"
+            f"RETURN p, r, q\n"
+        )
+        with self.__driver.session() as session:
+            ans = []
+            result = session.run(
+                query=query
+            )
+            for record in result:
+                p, q = record['p'], record['q']
+                p_labels, q_labels = p.labels, q.labels
+                p_prop, q_prop = dict(p), dict(q)
+                node_p = Node._create(
+                    graph=self,
+                    m_id=p_prop["m_id"],
+                    labels=p_labels,
+                    properties=p_prop
+                )
+                node_q = Node._create(
+                    graph=self,
+                    m_id=q_prop["m_id"],
+                    labels=q_labels,
+                    properties=q_prop
+                )
+                r = record['r']
+                r_label = r.type
+                r_prop = dict(r)
+                r_id = r_prop["r_id"]
+                from_m_id = r_prop["from"]
+                to_m_id = r_prop["to"]
+                rela = Relationship._create(
+                    graph=self,
+                    r_id=r_id,
+                    pos=(from_m_id, to_m_id),
+                    label=r_label,
+                    properties=r_prop
+                )
+                ans.append((node_p, rela, node_q))
+            return ans
+    
+    def update_rela(
+            self,
+            r_id: str,
+            pos: Tuple[str, str],
+            new_properties: Dict[str, str | int | float]
+        ):
+        from_m_id, to_m_id = pos
+        query = (
+            f"MATCH (p:memory {{ m_id: '{from_m_id}' }})\n"
+            f"MATCH (q:memory {{ m_id: '{to_m_id}' }})\n"
+            f"MATCH (p)-[r {{ r_id: '{r_id}' }}]->(q)\n"
+            f"FOREACH (key IN KEYS($new_properties) | SET r[key] = $new_properties[key])\n"
+        )
+        parameters = {
+            "new_properties": new_properties
+        }
+        with self.__driver.session() as session:
+            session.run(
+                query=query,
+                parameters=parameters
+            )
+    
+    def _delete_rela(
+            self,
+            r_id: str,
+            pos: Tuple[str, str]
+        ):
+        from_m_id, to_m_id = pos
+        query = (
+            f"MATCH (p:memory {{ m_id: '{from_m_id}' }})\n"
+            f"MATCH (q:memory {{ m_id: '{to_m_id}' }})\n"
+            f"MATCH (p)-[r {{ r_id: '{r_id}' }}]->(q)\n"
+            f"DELETE r\n"
+        )
+        with self.__driver.session() as session:
+            session.run(
+                query=query
+            )
 
 class Node:
     def __init__(self):
@@ -277,11 +359,9 @@ class Node:
     #     pass
     
     @ensure_alive
-    def destroy(self) -> bool:
-        if self.__graph._delete_node(self.m_id):
-            self._alive = False
-            return True
-        return False
+    def destroy(self):
+        self.__graph._delete_node(self.m_id)
+        self._alive = False
 
 class Relationship:
     def __init__(self):
@@ -342,4 +422,15 @@ class Relationship:
     
     @ensure_alive
     def update(self):
-        pass
+        self.__graph.update_rela(
+            r_id=self.r_id,
+            pos=self.pos,
+            new_properties=self._new_properties
+        )
+        
+    @ensure_alive
+    def destroy(self):
+        self.__graph._delete_rela(
+            r_id=self.r_id,
+            pos=self.pos
+        )
