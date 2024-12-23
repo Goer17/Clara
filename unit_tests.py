@@ -138,6 +138,17 @@ def test_audio():
     a_id = tts_hd.generate(text=text, voice="echo")
     AMEngine.play(a_id)
 
+@cast_arguments
+def test_orm():
+    from utils.neo4j_orm import Graph, Node, Relationship
+    graph = Graph(uri="bolt://localhost:7687", auth=("neo4j", "Yy030518neo4j"))
+    node1 = graph.create_node(label="word", properties={"abstract": "apple"})
+    node2 = graph.create_node(label="word", properties={"abstract": "banana"})
+    rela = node1.create_rela(to=node2, label="relative", properties={"content": "They are all fruits."})
+    print(rela)
+    
+    
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--function", type=str, help="The function you are going to test.")

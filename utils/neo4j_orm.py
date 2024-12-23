@@ -29,11 +29,12 @@ class Graph:
     
     def create_node(
             self,
-            labels: List[str] = ["memory"],
+            label: str | None = None,
             properties: Dict[str, str | int | float] = {},
         ) -> 'Node':
-        if "memory" not in labels:
-            labels.append("memory")
+        labels = ["memory"]
+        if label is not None and label != "memory":
+            labels.append(label)
         _labels = ":".join(labels)
         if "m_id" not in properties:
             properties["m_id"] = uuid()
@@ -41,27 +42,24 @@ class Graph:
         query = (
             f"CREATE (p:{_labels} {_properties})\n"
         )
-        try:
-            with self.__driver.session() as session:
-                session.run(
-                    query=query
-                )
-                node = Node._create(graph=self, m_id=properties["m_id"], labels=labels, properties=properties)
-                return node
-        except Exception as e:
-            pass
-        return None
+        with self.__driver.session() as session:
+            session.run(
+                query=query
+            )
+        node = Node._create(graph=self, m_id=properties["m_id"], labels=labels, properties=properties)
+        return node
 
     def match_node(
             self,
             m_id: str | None = None,
-            labels: List[str] = ["memory"],
+            label: str | None = None,
             properties: Dict = {},
             order: Tuple[str, Literal["ASC", "DESC"]] | None = None,
             limit: int | None = None
         ) -> List['Node']:
-        if "memory" not in labels:
-            labels.append("memory")
+        labels = ["memory"]
+        if label is not None and label != "memory":
+            labels.append(label)
         if m_id is not None:
             query = (
                 f"MATCH (p:memory {{ m_id: '{m_id}' }})\n"
@@ -145,6 +143,48 @@ class Graph:
         except Exception as e:
             pass
         return False
+    
+    def _create_rela(
+            self,
+            pos: Tuple[str, str],
+            label: str,
+            properties: Dict[str, str | int | float]
+        ) -> 'Relationship':
+        from_m_id, to_m_id = pos
+        properties["from"] = from_m_id
+        properties["to"] = to_m_id
+        properties["r_id"] = uuid()
+        query = (
+            f"MATCH (p:memory {{ m_id: '{from_m_id}' }})\n"
+            f"MATCH (q:memory {{ m_id: '{to_m_id}' }})\n"
+            f"CREATE (p)-[r:{label}]->(q)\n"
+            f"FOREACH (key IN keys($properties) | SET r[key] = $properties[key])\n"
+        )
+        parameters = {
+            "properties": properties
+        }
+        with self.__driver.session() as session:
+            session.run(
+                query=query,
+                parameters=parameters
+            )
+        rela = Relationship._create(
+            graph=self,
+            r_id=properties["r_id"],
+            pos=pos,
+            label=label,
+            properties=properties
+        )
+        return rela
+
+    def _match_rela(
+            self,
+            from_node_prop: Dict[str, str | int | float] = {},
+            to_node_prop: Dict[str, str | int | float] = {},
+            r_id: str | None = None,
+            properties: Dict[str, str | int | float] = {}
+        ) -> List['Relationship']:
+        pass
 
 class Node:
     def __init__(self):
@@ -171,14 +211,14 @@ class Node:
         return instance
 
     @staticmethod
-    def ensure_node_alive(method):
+    def ensure_alive(method):
         def wrapper(self, *args, **kwargs):
             if not getattr(self, '_alive', True):
                 raise RuntimeError("This node was already removed from graph")
             return method(self, *args, **kwargs)
         return wrapper
     
-    @ensure_node_alive
+    @ensure_alive
     def __str__(self):
         label = ""
         for lb in self.labels:
@@ -187,26 +227,26 @@ class Node:
                 break
         return f"[{label}] {self._properties}"
     
-    @ensure_node_alive
+    @ensure_alive
     def get_prop(self, key: str) -> str | int | float:
         return self._properties.get(key)
     
-    @ensure_node_alive
+    @ensure_alive
     def set_prop(self, key: str, value: str | int | float):
         self._properties[key] = value
         self._new_properties[key] = value
     
-    @ensure_node_alive
+    @ensure_alive
     def remove_prop(self, key: str):
         self._properties.pop(key)
         if key not in self._removed_properties:
             self._removed_properties.append(key)
     
-    @ensure_node_alive
+    @ensure_alive
     def set_label(self, label: str):
         self.labels = ["memory", label]
     
-    @ensure_node_alive
+    @ensure_alive
     def update(self) -> bool:
         if not self._alive:
             return False
@@ -219,17 +259,24 @@ class Node:
         self._new_properties = {} # refresh
         return True
     
-    @ensure_node_alive
-    def create_rela(self, to: 'Node', label: 'str', content: 'str') -> bool:
-        # TODO
-        pass
+    @ensure_alive
+    def create_rela(self, to: 'Node', label: 'str', properties: Dict[str, str | int | float]) -> 'Relationship':
+        assert to._alive
+        properties["r_id"] = uuid()
+        from_m_id = self.m_id
+        to_m_id = to.m_id
+        return self.__graph._create_rela(
+            pos=(from_m_id, to_m_id),
+            label=label,
+            properties=properties
+        )
     
-    @ensure_node_alive
-    def neighbors(self) -> List[Tuple['Node', 'Relationship']]:
-        # TODO
-        pass
+    # @ensure_alive
+    # def neighbors(self) -> List[Tuple['Node', 'Relationship']]:
+    #     # TODO
+    #     pass
     
-    @ensure_node_alive
+    @ensure_alive
     def destroy(self) -> bool:
         if self.__graph._delete_node(self.m_id):
             self._alive = False
@@ -240,6 +287,7 @@ class Relationship:
     def __init__(self):
         self.__graph: Graph = None
         self.r_id = None
+        self.pos = None
         self.label = None
         self._properties = None
         self._alive = False
@@ -247,9 +295,51 @@ class Relationship:
         self._removed_properties = []
         raise RuntimeError("Use Node.create_rela to get a Relationship instance")
     
+    @staticmethod
+    def ensure_alive(method):
+        def wrapper(self, *args, **kwargs):
+            if not getattr(self, '_alive', True):
+                raise RuntimeError("This relationship was already removed from graph")
+            return method(self, *args, **kwargs)
+        return wrapper
+    
     @classmethod
-    def _create():
+    def _create(cls, graph: Graph, r_id: str, pos: Tuple[str, str], label: str, properties: Dict[str, str | int | float]) -> 'Relationship':
+        instance = cls.__new__(cls)
+        instance.__graph = graph
+        instance.r_id = r_id
+        instance.pos = pos
+        instance.label = label
+        instance._properties = properties
+        instance._alive = True
+        instance._new_properties = {}
+        instance._removed_properties = []
+        
+        return instance
+    
+    @ensure_alive
+    def __str__(self):
+        return f"[{self.label}] {self._properties}"
+    
+    @ensure_alive
+    def get_prop(self, key: str) -> str | int | float:
+        return self._properties.get(key)
+    
+    @ensure_alive
+    def set_prop(self, key: str, value: str | int | float):
+        self._properties[key] = value
+        self._new_properties[key] = value
+       
+    @ensure_alive
+    def remove_prop(self, key: str):
+        self._properties.pop(key)
+        if key not in self._removed_properties:
+            self._removed_properties.append(key)
+    
+    @ensure_alive
+    def set_label(self, label: str):
+        self.label = label
+    
+    @ensure_alive
+    def update(self):
         pass
-    
-    
-    
