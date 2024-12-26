@@ -10,6 +10,6 @@
 
 #### Todo List
 
-- [ ] Implement the ORM Model of Neo4j
+- [x] Implement the ORM Model of Neo4j
 - [ ] Implement the ORM Memory Class and ORM Retriever
 - [ ] Other question : sentence-making & listening

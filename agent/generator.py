@@ -13,7 +13,7 @@ from utils.questions import (
 from utils.logger import (
     logger
 )
-from .memory import (
+from ._memory import (
     Memory
 )
 

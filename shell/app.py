@@ -9,7 +9,7 @@ from typing import (
 
 from utils.general import (
     LLMEngine,
-    gpt_4o_engine
+    gpt_4o
 )
 from utils.dictionary import (
     LLMDictionary,
@@ -20,16 +20,16 @@ from utils.questions import (
 )
 
 from agent.planner import Planner
-from agent.retriever import Retriever
+from agent._retriever import Retriever
 from agent.generator import Generator
 
 
 class ShellApp:
     def __init__(self):
-        self.planner = Planner(engine=gpt_4o_engine)
-        self.retriever = Retriever(engine=gpt_4o_engine)
-        self.generator = Generator(engine=gpt_4o_engine)
-        self.dictionary = LLMDictionary(engine=gpt_4o_engine)
+        self.planner = Planner(engine=gpt_4o)
+        self.retriever = Retriever(engine=gpt_4o)
+        self.generator = Generator(engine=gpt_4o)
+        self.dictionary = LLMDictionary(engine=gpt_4o)
     
     def __add_unfamiliar_word(self, word: str) -> bool:
         content = self.dictionary(word)

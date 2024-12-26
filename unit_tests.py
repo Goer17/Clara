@@ -1,13 +1,13 @@
 import os
 from dotenv import find_dotenv, load_dotenv
 import argparse
-from agent.memory import Memory
+from agent._memory import Memory
 from utils.general import LLMEngine
 from utils.dictionary import (
     to_text,
     LLMDictionary
 )
-from agent.retriever import Retriever
+from agent._retriever import Retriever
 from agent.generator import (
     Question,
     Generator
@@ -165,7 +165,30 @@ def test_orm_del():
     if len(res) == 0:
         return
     p, r, q = res[0]
-    r.destroy()
+    r._destroy()
+
+def test_async():
+    import asyncio
+    results = {}
+    async def gen(question: str):
+        results[question] = await engine.async_generate(prompt=question)
+    questions = [
+        "What is 1 + 1?",
+        "What is 1 + 2?",
+        "What is 1 + 3?",
+        "What is 1 + 4?",
+        "What is 1 + 5?",
+        "What is 1 + 6?",
+        "What is 1 + 7?",
+        "What is 1 + 8?",
+        "What is 1 + 9?"
+    ]
+    coro_list = [gen(q) for q in questions]
+    asyncio.run(asyncio.wait(coro_list, timeout=None))
+    for q, a in sorted(results.items()):
+        print(f"{q} | {a}")
+    
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

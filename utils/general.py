@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
-from openai import Client
+from openai import (
+    Client, AsyncClient
+)
 from typing_extensions import (
     List, Dict
 )
@@ -31,9 +33,12 @@ class LLMEngine:
             api_key=api_key,
             base_url=base_url
         )
+        self.async_client = AsyncClient(
+            api_key=api_key,
+            base_url=base_url
+        )
         
-    def generate(self, prompt: str | Prompt | None = None, sys_prompt: str | Prompt | None = None, few_shots: List[Dict] | None = None,
-                 *args, **kwargs):
+    def __pack_message(self, prompt: str | Prompt | None = None, sys_prompt: str | Prompt | None = None, few_shots: List[Dict] = []) -> List[Dict]:
         messages = []
         if sys_prompt:
             messages.append(
@@ -57,11 +62,35 @@ class LLMEngine:
                 }
             )
         
+        return messages
+        
+    def generate(self, prompt: str | Prompt | None = None, sys_prompt: str | Prompt | None = None, few_shots: List[Dict] = [],
+                 *args, **kwargs) -> str:
+        messages = self.__pack_message(
+            prompt=prompt,
+            sys_prompt=sys_prompt,
+            few_shots=few_shots
+        )
         response = self.client.chat.completions.create(
             model=self.model,
             messages=messages,
             *args, **kwargs
         ).choices[0].message.content
+        return response
+    
+    async def async_generate(self, prompt: str | Prompt | None = None, sys_prompt: str | Prompt | None = None, few_shots: List[Dict] = [],
+                             *args, **kwargs) -> str:
+        messages = self.__pack_message(
+            prompt=prompt,
+            sys_prompt=sys_prompt,
+            few_shots=few_shots
+        )
+        response = (await self.async_client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            *args, **kwargs
+        )).choices[0].message.content
+        
         return response
 
 from playsound import playsound

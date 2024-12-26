@@ -353,13 +353,8 @@ class Node:
             properties=properties
         )
     
-    # @ensure_alive
-    # def neighbors(self) -> List[Tuple['Node', 'Relationship']]:
-    #     # TODO
-    #     pass
-    
     @ensure_alive
-    def destroy(self):
+    def _destroy(self):
         self.__graph._delete_node(self.m_id)
         self._alive = False
 
@@ -429,8 +424,9 @@ class Relationship:
         )
         
     @ensure_alive
-    def destroy(self):
+    def _destroy(self):
         self.__graph._delete_rela(
             r_id=self.r_id,
             pos=self.pos
         )
+        self._alive = False
