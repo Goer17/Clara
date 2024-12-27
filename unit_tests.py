@@ -165,7 +165,7 @@ def test_orm_del():
     if len(res) == 0:
         return
     p, r, q = res[0]
-    r._destroy()
+    r.destroy()
 
 def test_async():
     import asyncio
@@ -188,7 +188,16 @@ def test_async():
     for q, a in sorted(results.items()):
         print(f"{q} | {a}")
     
-    
+def test_manager():
+    from agent.retriever import MemoryNode, MemoryManager
+    manager = MemoryManager()
+    nodes = manager.match_node({"abstract": "apple"})
+    if len(nodes) == 0:
+        return
+    node: MemoryNode = nodes[0]
+    node.set_prop("familiarity", 100)
+    node.set_label("word")
+    node.update()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

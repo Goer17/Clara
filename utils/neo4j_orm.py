@@ -46,7 +46,7 @@ class Graph:
             session.run(
                 query=query
             )
-        node = Node._create(graph=self, m_id=properties["m_id"], labels=labels, properties=properties)
+        node = Node._create(graph=self, m_id=properties["m_id"], label=label, properties=properties)
         return node
 
     def match_node(
@@ -87,8 +87,9 @@ class Graph:
                     p = record["p"]
                     m_id = p["m_id"]
                     p_labels = list(p.labels)
+                    p_label = p_labels[1] if p_labels[1] != "memory" else p_labels[0]
                     p_props = dict(p)
-                    node = Node._create(graph=self, m_id=m_id, labels=p_labels, properties=p_props)
+                    node = Node._create(graph=self, m_id=m_id, label=p_label, properties=p_props)
                     nodes.append(node)
                 return nodes      
         except Exception as e:
@@ -98,7 +99,7 @@ class Graph:
     def _update_node(
             self,
             m_id: str,
-            new_labels: List[str] = [],
+            new_label: str,
             new_properties: Dict = {},
             removed_properties: List[str] = []
         ):
@@ -110,7 +111,7 @@ class Graph:
             f"FOREACH (rkey IN $removed_properties | REMOVE p[rkey])\n"
         )
         parameters = {
-            "new_labels": new_labels,
+            "new_labels": ["memory", new_label],
             "new_properties" : new_properties,
             "removed_properties": removed_properties
         }
@@ -272,7 +273,7 @@ class Node:
     def __init__(self):
         self.__graph: Graph = None
         self.m_id = None
-        self.labels = None
+        self.label = None
         self._properties = None
         self._alive = False
         self._new_properties = {}
@@ -280,11 +281,11 @@ class Node:
         raise RuntimeError("Use Graph.create_node or Graph.match_node to get a Node instance")
 
     @classmethod
-    def _create(cls, graph: Graph, m_id: int, labels: List[str], properties: Dict[str, str | int | float]) -> 'Node':
+    def _create(cls, graph: Graph, m_id: int, label: str, properties: Dict[str, str | int | float]) -> 'Node':
         instance = cls.__new__(cls)
         instance.__graph = graph
         instance.m_id = m_id
-        instance.labels = labels
+        instance.label = label
         instance._properties = properties
         instance._alive = True
         instance._new_properties = {}
@@ -302,12 +303,7 @@ class Node:
     
     @ensure_alive
     def __str__(self):
-        label = ""
-        for lb in self.labels:
-            if lb != "memory":
-                label = lb
-                break
-        return f"[{label}] {self._properties}"
+        return f"[{self.label}] {self._properties}"
     
     @ensure_alive
     def get_prop(self, key: str) -> str | int | float:
@@ -326,23 +322,21 @@ class Node:
     
     @ensure_alive
     def set_label(self, label: str):
-        self.labels = ["memory", label]
+        self.label = label
     
     @ensure_alive
-    def update(self) -> bool:
-        if not self._alive:
-            return False
+    def update(self):
         self.__graph._update_node(
             m_id=self.m_id,
-            new_labels=self.labels,
+            new_label=self.label,
             new_properties=self._new_properties,
             removed_properties=self._removed_properties
         )
-        self._new_properties = {} # refresh
-        return True
+        self._new_properties = {}
+        self._removed_properties = []
     
     @ensure_alive
-    def create_rela(self, to: 'Node', label: 'str', properties: Dict[str, str | int | float]) -> 'Relationship':
+    def create_rela(self, to: 'Node', label: str, properties: Dict[str, str | int | float]) -> 'Relationship':
         assert to._alive
         properties["r_id"] = uuid()
         from_m_id = self.m_id
@@ -424,7 +418,7 @@ class Relationship:
         )
         
     @ensure_alive
-    def _destroy(self):
+    def destroy(self):
         self.__graph._delete_rela(
             r_id=self.r_id,
             pos=self.pos
