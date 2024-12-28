@@ -23,7 +23,7 @@ base_url = os.environ["BASE_URL"]
 openai_api_key = os.environ["OPENAI_API_KEY"]
 
 engine = LLMEngine(
-    model='gpt-4o',
+    model='gpt-4o-mini',
     api_key=openai_api_key,
     base_url=base_url
 )

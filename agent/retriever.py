@@ -216,14 +216,15 @@ class Retriever:
                 fr.create_rela(to, label, rela)
         try:
             sim_nodes = self.memory.query(node_profile["abstract"], n_rela)
-            if len(sim_nodes) > 0 and sim_nodes[0].get_prop("abstract") == node_profile["abstarct"]:
+            if len(sim_nodes) > 0 and sim_nodes[0].get_prop("abstract") == node_profile["abstract"]:
                 # TODO merge the memory
                 return True
             node = self.memory.add_node(node_profile)
             coro_list = []
             for sim_node in sim_nodes:
                 coro_list.append(gen_rela(node, sim_node))
-            asyncio.run(asyncio.wait(coro_list, timeout=None))
+            if len(coro_list) > 0:
+                asyncio.run(asyncio.wait(coro_list, timeout=None))
             return True
         except Exception as e:
             logger.error(f"Retriever.remember() : an error occurred while attempting to remember the the node: {node_profile}", e)
