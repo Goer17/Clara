@@ -31,8 +31,8 @@ create_rela_word2word:
         ``` 
         `label`: A single word that best describes the relationship between the two texts. label has 4 values:
         - "relative": when two words belong to the same domain or have some kind of relationship. It is the most common label
-        - "synonyms": when the two words are synonyms
-        - "antonyms": when the two words are antonyms
+        - "synonyms": when the two words are **strictly** considered synonyms. If they are not exact synonyms, I suggest describing them as "relative" instead
+        - "antonyms": when the two words are **strictly** considered antonyms. If they are not exact synonyms, I suggest describing them as "relative" instead
         - "derived": when one word is derived from the other
         `content`: A detailed explanation of the relationship between two words.
         If you believe there is no relationship between the two texts, simply end your response with "NO_RELA"
@@ -61,7 +61,7 @@ create_rela_word2word:
             ```json
             {
                 "label": "synonyms",
-                "content": "`happy` and `joyful` describe similar positive emotional states."
+                "content": "`happy` and `joyful` describe similar positive emotional states. `happy` refers to a light, everyday feeling of pleasure or satisfaction, often caused by external events; `joyful` describes a deeper, more meaningful sense of happiness, often coming from within or tied to significant moments."
             }
             ```
         

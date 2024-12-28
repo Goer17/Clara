@@ -214,6 +214,13 @@ def test_formatter():
     data = Formatter.catch_json(text)
     print(data)
 
+def test_logger():
+    from utils.logger import logger
+    try:
+        x = 1 / 0
+    except Exception as e:
+        logger.error("One error occurred when computing x", e)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--function", type=str, help="The function you are going to test.")

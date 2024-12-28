@@ -22,7 +22,7 @@ class MemoryNode:
                  ):
         for key in ["abstract", "content"]:
             if key not in node._properties:
-                raise RuntimeError(f"MemoryNode.__init__() : {key} not found in node : {node}")
+                raise RuntimeError(f"MemoryNode.__init__() : {key} not found in the node : {node}")
         self._node: Node = node
         self._collection: Collection = collection
     
@@ -57,15 +57,15 @@ class MemoryNode:
         try:
             self._collection.delete([m_id])
         except Exception as e:
-            logger.error(f"MemoryNode::destroy : One error occcurred when deleting the node in vectorDB, node(mid = {self._node.m_id})")
+            logger.error(f"MemoryNode.destroy() : an error occurred while attempting to delete the node in the vector DB: {self._node}", e)
             return False
         try:
             self._node._destroy()
             return True
         except Exception as e:
-            logger.error(f"MemoryNode::destory : One error occurred when deleting the node in graph DB: {self._node}")
-            logger.info(f"Rollback...")
+            logger.error(f"MemoryNode.destory() : an error occurred while attempting to delete the node in the graph DB: {self._node}", e)
             self._collection.add([m_id], documents=[abstract])
+            logger.info(f"MemoryNode.destroy() : rollback... successully added the node back to vector DB: {self._node}")
             return False
     
     def text(self, enclose: bool = False) -> str:
@@ -101,7 +101,7 @@ class MemoryManager:
             "content"
         ]:
             if key not in node_profile:
-                logger.error(f"MemoryManager::add_node : `{key}` not found in node profile")
+                logger.error(f"MemoryManager.add_node() : `{key}` not found in node profile")
                 return None
         m_id = uuid()
         node_profile["m_id"] = m_id
@@ -110,18 +110,18 @@ class MemoryManager:
         try:
             self.__collection.add([m_id], documents=[abstract])
         except Exception as e:
-            logger.error(f"MemoryManager::add_node : One error occurred when adding a node : [{label}]\n{node_profile} -> {e}")
+            logger.error(f"MemoryManager.add_node() : an error occurred while attempting to add the node in the vector DB : [{label}]\n{node_profile}", e)
             return None
         try:
             node = self.__graph.create_node(label, node_profile)
-            logger.info(f"MemoryManager::add_node : successfully added node : {node}")
+            logger.info(f"MemoryManager.add_node() : successfully added the node : {node}")
             memory_node = MemoryNode(node, self.__collection)
             return memory_node
         except Exception as e:
             # Rollback
-            logger.error(f"MemoryManager::add_node : One error occurred when adding a node : [{label}]\n{node_profile} -> {e}")
+            logger.error(f"MemoryManager.add_node() : an error occurred while attempting to add the node in the graph DB : [{label}]\n{node_profile}", e)
             self.__collection.delete([m_id])
-            logger.info(f"MemoryManager::add_node : rollback... deleted node(mid = {m_id}) in vector DB.")
+            logger.info(f"MemoryManager.add_node() : rollback... successfully deleted node(mid = {m_id}) in vector DB.")
             return None
     
     def match_node(self,
@@ -162,7 +162,7 @@ class MemoryManager:
                 memory_node_list.append(memory_node)
             return memory_node_list
         except Exception as e:
-            logger.error(f"MemoryManager::query : One error occurred when query similar nodes with abstract: '{query_abstract}', n_rela = {n_rela} : {e}")
+            logger.error(f"MemoryManager.query() : an error occurred while attempting to query similar nodes with query abstract: '{query_abstract}', n_rela = {n_rela}", e)
             return []
 
 class Retriever:
@@ -186,6 +186,7 @@ class Retriever:
             sys_prompt = self.all_prompts["create_rela_word2word"]["sys_prompt"]
             few_shots = self.all_prompts["create_rela_word2word"]["few_shots"]
         else:
+            # TODO
             pass
         prompt = f"{n1.text(enclose=True)}\n{n2.text(enclose=True)}"
         
@@ -204,7 +205,7 @@ class Retriever:
             response = Formatter.catch_json(response)
             return response
         except Exception as e:
-            logger.error(f"Retriever::__gen_rela() : One error occurred : {e}")
+            logger.error(f"Retriever.__gen_rela() : an error occurred while attempting to generate the relationship between 2 nodes:\n{n1}\n{n2}", e)
             return None
     
     def remember(self, node_profile: Dict[str, str | int | float], n_rela: int = 5) -> bool:
@@ -225,7 +226,7 @@ class Retriever:
             asyncio.run(asyncio.wait(coro_list, timeout=None))
             return True
         except Exception as e:
-            logger.error(f"Retriever::remember() : {e}")
+            logger.error(f"Retriever.remember() : an error occurred while attempting to remember the the node: {node_profile}", e)
             return False
     
     @requires_superuser
@@ -233,6 +234,4 @@ class Retriever:
         nodes = self.memory.match_node()
         for node in nodes:
             if node.destroy():
-                logger.info(f"Retriever::clear_all() : deleted node : {node}")
-            else:
-                logger.error(f"Retriever::clear_all() : one error occurred when deleting node : {node}")
+                logger.info(f"Retriever.clear_all() : successfully deleted the node : {node}")

@@ -159,6 +159,3 @@ class Retriever:
                 self.__create_rela(m_id, item[0])
         
         return True
-
-class ORMRetriever:
-    pass
