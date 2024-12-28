@@ -301,7 +301,6 @@ class Node:
             return method(self, *args, **kwargs)
         return wrapper
     
-    @ensure_alive
     def __str__(self):
         return f"[{self.label}] {self._properties}"
     

@@ -7,7 +7,7 @@ from utils.dictionary import (
     to_text,
     LLMDictionary
 )
-from agent._retriever import Retriever
+from agent.retriever import Retriever
 from agent.generator import (
     Question,
     Generator
@@ -57,8 +57,8 @@ def cast_arguments(func):
     return wrapper
 
 def clear_all():
-    memo = Memory()
-    memo.clear_all()
+    retriver = Retriever(engine=engine)
+    retriver.clear_all()
 
 @cast_arguments
 def remember_voc(max_line: int = -1):
@@ -94,7 +94,7 @@ def remember_unfamiliar_voc(max_line: int = -1):
             voc = json.loads(line)
             voc["label"] = "unfamiliar_word"
             voc["familiarity"] = 0
-            retriver.remember(voc, rela_number=5)
+            retriver.remember(voc, n_rela=5)
             line_idx += 1
             if max_line > 0 and line_idx >= max_line:
                 break
@@ -198,6 +198,21 @@ def test_manager():
     node.set_prop("familiarity", 100)
     node.set_label("word")
     node.update()
+    
+text = """
+Hello, world
+```json
+{
+    "abstract": "apple"
+}
+```
+End
+"""
+
+def test_formatter():
+    from utils.string import Formatter
+    data = Formatter.catch_json(text)
+    print(data)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

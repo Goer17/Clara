@@ -1,3 +1,4 @@
+import os, asyncio
 import yaml
 from pathlib import Path
 from shortuuid import uuid
@@ -12,6 +13,7 @@ from utils.general import (
     LLMEngine
 )
 from utils.logger import logger
+from utils.string import Formatter
 
 class MemoryNode:
     def __init__(self,
@@ -23,6 +25,10 @@ class MemoryNode:
                 raise RuntimeError(f"MemoryNode.__init__() : {key} not found in node : {node}")
         self._node: Node = node
         self._collection: Collection = collection
+    
+    @property
+    def label(self):
+        return self._node.label
     
     def __str__(self):
         return self._node.__str__()
@@ -62,12 +68,15 @@ class MemoryNode:
             self._collection.add([m_id], documents=[abstract])
             return False
     
-    def text(self) -> str:
+    def text(self, enclose: bool = False) -> str:
         result = (
             f"label: {self._node.label}\n",
             f"abstract: {self._node.get_prop('abstract')}\n"
             f"content:\n{self._node.get_prop('content')}\n"
         )
+        if enclose:
+            result = f"```txt\n{result}\n```"
+        
         return result
 
 
@@ -144,9 +153,9 @@ class MemoryManager:
     def query(self,
               query_abstract: str,
               n_rela: int
-              ) -> List[Node]:
+              ) -> List[MemoryNode]:
         try:
-            m_ids = self.__collection.query(query_texts=[query_abstract])["ids"]
+            m_ids = self.__collection.query(query_texts=[query_abstract], n_results=n_rela)["ids"][0]
             memory_node_list = []
             for m_id in m_ids:
                 memory_node = self.match_node({"m_id": m_id})[0]
@@ -156,7 +165,7 @@ class MemoryManager:
             logger.error(f"MemoryManager::query : One error occurred when query similar nodes with abstract: '{query_abstract}', n_rela = {n_rela} : {e}")
             return []
 
-class Retriver:
+class Retriever:
     def __init__(self, engine: LLMEngine):
         self.engine = engine
         self.memory = MemoryManager()
@@ -164,13 +173,66 @@ class Retriver:
         with open(retriever_path) as f:
             self.all_prompts = yaml.safe_load(f)
     
-    def __gen_rela(self, n1: MemoryNode, n2: MemoryNode) -> Dict[str, str | int | float]:
-        pass
+    @staticmethod
+    def requires_superuser(method):
+        def wrapper(self, *args, **kwargs):
+            if os.geteuid() != 0:
+                raise RuntimeError(f"Error: Method '{method.__name__}' requires superuser privileges.")
+            return method(self, *args, **kwargs)
+        return wrapper
+    
+    def __gen_rela_prompts(self, n1: MemoryNode, n2: MemoryNode):
+        if n1.label in ["word", "unfamiliar_word"] and n2.label in ["word", "unfamiliar_word"]:
+            sys_prompt = self.all_prompts["create_rela_word2word"]["sys_prompt"]
+            few_shots = self.all_prompts["create_rela_word2word"]["few_shots"]
+        else:
+            pass
+        prompt = f"{n1.text(enclose=True)}\n{n2.text(enclose=True)}"
+        
+        return sys_prompt, few_shots, prompt
+    
+    async def __gen_rela(self, n1: MemoryNode, n2: MemoryNode) -> Dict[str, str | int | float]:
+        sys_prompt, few_shots, prompt = self.__gen_rela_prompts(n1, n2)
+        response = await self.engine.async_generate(
+            prompt=prompt,
+            sys_prompt=sys_prompt,
+            few_shots=few_shots
+        )
+        if "NO_RELA" in response:
+            return None
+        try:
+            response = Formatter.catch_json(response)
+            return response
+        except Exception as e:
+            logger.error(f"Retriever::__gen_rela() : One error occurred : {e}")
+            return None
     
     def remember(self, node_profile: Dict[str, str | int | float], n_rela: int = 5) -> bool:
+        async def gen_rela(fr: MemoryNode, to: MemoryNode):
+            rela = await self.__gen_rela(fr, to)
+            if rela is not None and "label" in rela:
+                label = rela.pop("label")
+                fr.create_rela(to, label, rela)
         try:
+            sim_nodes = self.memory.query(node_profile["abstract"], n_rela)
+            if len(sim_nodes) > 0 and sim_nodes[0].get_prop("abstract") == node_profile["abstarct"]:
+                # TODO merge the memory
+                return True
             node = self.memory.add_node(node_profile)
-            sim_nodes = self.memory.query(node.get_prop("abstract"), n_rela)
-            
+            coro_list = []
+            for sim_node in sim_nodes:
+                coro_list.append(gen_rela(node, sim_node))
+            asyncio.run(asyncio.wait(coro_list, timeout=None))
+            return True
         except Exception as e:
-            pass
+            logger.error(f"Retriever::remember() : {e}")
+            return False
+    
+    @requires_superuser
+    def clear_all(self):
+        nodes = self.memory.match_node()
+        for node in nodes:
+            if node.destroy():
+                logger.info(f"Retriever::clear_all() : deleted node : {node}")
+            else:
+                logger.error(f"Retriever::clear_all() : one error occurred when deleting node : {node}")
