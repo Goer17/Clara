@@ -6,6 +6,7 @@ from typing import (
 )
 
 from utils.general import LLMEngine
+from utils.string import Formatter
 
 def to_text(content: Dict) -> str | None:
     try:
@@ -40,10 +41,7 @@ class LLMDictionary:
         if "NO_EXIST" in response:
             return None
         try:
-            content = re.search(pattern=r"```json(.*?)```", string=response, flags=re.S).group(1)
-            content = json.loads(content)
+            content = Formatter.catch_json(response)
             return content
         except Exception as e:
-            print(e)
-        
-        return None
+            return None

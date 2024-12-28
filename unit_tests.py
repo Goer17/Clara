@@ -221,6 +221,15 @@ def test_logger():
     except Exception as e:
         logger.error("One error occurred when computing x", e)
 
+def test_edit():
+    from utils.questions import ListeningQuestion
+    q = ListeningQuestion(content="", solution="The conference starts at ten fifteen a.m. sharp.", rela_nodes=[])
+    answer = "The conference starts at 10:50 a.m. sharp."
+    score, analysis, feedbacks = q.mark(answer, engine)
+    print(score)
+    print(analysis)
+    print(feedbacks)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--function", type=str, help="The function you are going to test.")
