@@ -208,7 +208,14 @@ class Retriever:
             logger.error(f"Retriever.__gen_rela() : an error occurred while attempting to generate the relationship between 2 nodes:\n{n1}\n{n2}", e)
             return None
     
-    def remember(self, node_profile: Dict[str, str | int | float], n_rela: int = 5) -> bool:
+    def match_node(self,
+                   node_profile: Dict[str, str | int | float] = {},
+                   order: Tuple[str, Literal["ASC", "DESC"]] | None = None,
+                   limit: int | None = None
+                   ) -> List[MemoryNode]:
+        return self.memory.match_node(node_profile, order, limit)
+        
+    def remember(self, node_profile: Dict[str, str | int | float], n_rela: int = 5) -> MemoryNode:
         async def gen_rela(fr: MemoryNode, to: MemoryNode):
             rela = await self.__gen_rela(fr, to)
             if rela is not None and "label" in rela:
@@ -218,17 +225,17 @@ class Retriever:
             sim_nodes = self.memory.query(node_profile["abstract"], n_rela)
             if len(sim_nodes) > 0 and sim_nodes[0].get_prop("abstract") == node_profile["abstract"]:
                 # TODO merge the memory
-                return True
+                return sim_nodes[0]
             node = self.memory.add_node(node_profile)
             coro_list = []
             for sim_node in sim_nodes:
                 coro_list.append(gen_rela(node, sim_node))
             if len(coro_list) > 0:
                 asyncio.run(asyncio.wait(coro_list, timeout=None))
-            return True
+            return node
         except Exception as e:
             logger.error(f"Retriever.remember() : an error occurred while attempting to remember the the node: {node_profile}", e)
-            return False
+            return None
     
     @requires_superuser
     def clear_all(self):

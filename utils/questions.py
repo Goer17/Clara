@@ -163,7 +163,7 @@ class ListeningQuestion(Question):
 
 class Quiz:
     def __init__(self):
-        self.problemset: Dict[List[Question]] = defaultdict(List[Question])
+        self.problemset: Dict[List[Question]] = defaultdict(list)
     
     def add(self, q: Question):
-        self.problemset[type(q)].append(q)
+        self.problemset[type(q).__name__].append(q)

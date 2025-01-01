@@ -1,4 +1,4 @@
-gap_filling:
+GapFillingQuestion:
     sys_prompt: |
         You are an English teacher, and I need you to generate gap-filling questions based on the student's unfamiliar words or common mistakes.
         For each session, I will provide one or a list of words the student struggles with and the errors they often make.
