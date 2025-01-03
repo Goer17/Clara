@@ -80,6 +80,10 @@ class SentenceMakingQuestion(Question):
     def __feedback(self, answer: str) -> List[Dict[str, str]]:
         # TODO
         pass
+    
+    def mark(self, answer, engine):
+        # TODO
+        pass
 
 class ListeningQuestion(Question):
     def __init__(self, content, solution, rela_nodes, analysis = None, *args, **kwargs):
@@ -163,7 +167,19 @@ class ListeningQuestion(Question):
 
 class Quiz:
     def __init__(self):
-        self.problemset: Dict[List[Question]] = defaultdict(list)
+        self.problemset: Dict[str, List[Question]] = defaultdict(list)
     
     def add(self, q: Question):
         self.problemset[type(q).__name__].append(q)
+    
+    def shell(self):
+        pass
+    
+    def save(self, path: str | Path) -> bool:
+        # TODO
+        pass
+    
+    @staticmethod
+    def load(path: str | Path) -> 'Quiz':
+        # TODO
+        pass

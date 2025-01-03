@@ -76,6 +76,7 @@ class LLMEngine:
             messages=messages,
             *args, **kwargs
         ).choices[0].message.content
+        logger.info(f"LLMEngine.generate() [{self.model}] : {response}")
         return response
     
     async def async_generate(self, prompt: str | Prompt | None = None, sys_prompt: str | Prompt | None = None, few_shots: List[Dict] = [],
@@ -90,8 +91,12 @@ class LLMEngine:
             messages=messages,
             *args, **kwargs
         )).choices[0].message.content
-        
+        logger.info(f"LLMEngine.async_generate() [{self.model}] : {response}")
         return response
+
+    def close(self):
+        self.client.close()
+        self.async_client.close()
 
 from playsound import playsound
 import hashlib

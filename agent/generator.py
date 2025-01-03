@@ -10,12 +10,13 @@ from typing_extensions import (
 from utils.questions import (
     Question,
     GapFillingQuestion,
-    Quiz
+    SentenceMakingQuestion,
+    ListeningQuestion
 )
 from utils.logger import (
     logger
 )
-from agent.retriever import MemoryNode, Retriever
+from agent.retriever import MemoryNode
 from utils.string import Formatter
 
 class Generator:
@@ -42,27 +43,36 @@ class Generator:
             logger.error("Generator.gen_gap_filling() : an error occurred when attempting to generate a gap filling quesion", e)
             return None
     
-    async def gen_sentence_making(self, rela_nodes: List[MemoryNode]):
-        pass
+    async def gen_sentence_making(self, rela_nodes: List[MemoryNode]) -> SentenceMakingQuestion:
+        prompt = "\n\n".join(rela_node.text(enclose=True) for rela_node in rela_nodes)
+        sys_prompt = self.prompts_cfg["SentenceMakingQuestion"]["sys_prompt"]
+        few_shots = self.prompts_cfg["SentenceMakingQuestion"]["few_shots"]
+        response = await self.engine.async_generate(prompt, sys_prompt, few_shots)
+        try:
+            response = Formatter.catch_json(response)
+            scenario = response["scenario"]
+            solution = response["answer"]
+            lang = response["lang"]
+            question = SentenceMakingQuestion(scenario, solution, rela_nodes, analysis=lang)
+            logger.info(f"Generator.gen_sentence_making() : successfully generated a sentence making question: {question.content}")
+            return question
+        except Exception as e:
+            logger.error("Generator.gen_sentence_making() : an error occurred when attempting to generate a sentence making quesion", e)
+            return None
     
     async def gen_listening(self, rela_nodes: List[MemoryNode]):
-        pass
-
-    def gen_quiz(self, config: Dict[str, int], retriever: Retriever):
-        quiz = Quiz()
-        if (gap_filling_cnt := config.get("GapFillingQuestion", 0)) > 0:
-            unfamiliar_nodes = retriever.match_node(
-                {
-                    "label": "unfamiliar_word"
-                },
-                order=("familiarity", "ASC"),
-                limit=gap_filling_cnt
-            )
-            async def add_gap_filling(rela_nodes: List[MemoryNode]):
-                question = await self.gen_gap_filling(rela_nodes)
-                if question is not None:
-                    quiz.add(question)
-            coro_list = [add_gap_filling([unfamiliar_node]) for unfamiliar_node in unfamiliar_nodes]
-            asyncio.run(asyncio.wait(coro_list, timeout=None))
-        
-        return quiz
+        prompt = "\n\n".join(rela_node.text(enclose=True) for rela_node in rela_nodes)
+        sys_prompt = self.prompts_cfg["ListeningQuestion"]["sys_prompt"]
+        few_shots = self.prompts_cfg["ListeningQuestion"]["few_shots"]
+        response = await self.engine.async_generate(prompt, sys_prompt, few_shots)
+        try:
+            response = Formatter.catch_json(response)
+            sentence = response["sentence"]
+            question = ListeningQuestion(content="", solution=sentence, rela_nodes=rela_nodes)
+            return question
+        except Exception as e:
+            logger.error("Generator.gen_listening() : an error occurred when attempting to generate a listening question", e)
+            return None
+    
+    def close(self):
+        self.engine.close()

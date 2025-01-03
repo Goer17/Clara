@@ -61,6 +61,7 @@ class MemoryNode:
             return False
         try:
             self._node._destroy()
+            logger.info(f"MemoryNode.destroy() : a node was successfully deleted in memory : {self._node}")
             return True
         except Exception as e:
             logger.error(f"MemoryNode.destory() : an error occurred while attempting to delete the node in the graph DB: {self._node}", e)
@@ -164,6 +165,9 @@ class MemoryManager:
         except Exception as e:
             logger.error(f"MemoryManager.query() : an error occurred while attempting to query similar nodes with query abstract: '{query_abstract}', n_rela = {n_rela}", e)
             return []
+    
+    def close(self):
+        self.__graph.close()
 
 class Retriever:
     def __init__(self, engine: LLMEngine):
@@ -236,6 +240,10 @@ class Retriever:
         except Exception as e:
             logger.error(f"Retriever.remember() : an error occurred while attempting to remember the the node: {node_profile}", e)
             return None
+    
+    def close(self):
+        self.memory.close()
+        self.engine.close()
     
     @requires_superuser
     def clear_all(self):

@@ -39,3 +39,82 @@ GapFillingQuestion:
             }
             ```
 
+SentenceMakingQuestion:
+    sys_prompt: |
+        You are an English teacher responsible for designing sentence-making exercises for students.  
+        I will provide you with specific words that students find challenging or have previously made mistakes with.  
+        These words will be enclosed in ```txt```.
+        Your task is to create a scenario where students are required to use the given word in a sentence.
+        Respond in the following JSON format:
+        ```json
+        {
+            "scenario": "...",
+            "answer": "your referrenced answer",
+            "lang": ["...", "..."]
+        }
+        ```
+        - `scenario`: A realistic and practical situation where the word or phrase could be used in everyday life.
+        - `answer`: Your reference answer for the scenario.
+        - `lang`: The linguistic elements relevant to the question, such as the word, phrase, or grammatical structure being tested.
+        Before generating the final question, take a moment to briefly reason through the process to ensure clarity and relevance.
+    
+    few_shots:
+        - role: user
+          content: |
+            ```txt
+            label: unfamiliar_word
+            abstract: abate
+            content:
+            [verb] to become less intense or widespread.
+            > The storm began to abate after several hours.
+            > She waited for the pain to abate before moving again.
+            ```
+        - role: assistant
+          content: |
+            The word 'abate' is often used to describe the reduction in intensity of something unpleasant, such as a storm, pain, or fear.
+            A realistic scenario involving a storm allows students to contextualize the word naturally, making it easier to grasp its meaning and usage.
+            ```json
+            {
+                "scenario": "Imagine a situation where a severe storm has been raging all night. Describe what happens when the storm starts to calm down.",
+                "answer": "The storm began to abate as the winds slowed, and the rain lessened, bringing a sense of relief to the residents.",
+                "lang": ["abate", "begin to abate"]
+            }
+            ```
+        
+        
+
+
+ListeningQuestion:
+    sys_prompt: |
+        You are an English teacher tasked with creating listening exercises for students.
+        I will provide you with specific words or phrases that students find challenging or have made mistakes with in the past.
+        These will be enclosed in ```txt```
+        Your task is to use these words or phrases to craft short, clear sentences that are easy for students to hear and understand.
+        Respond in the following JSON format:
+        ```json
+        {
+            "sentence": "..."
+        }
+        ```
+        I hope your question differs from the example sentences in the memory items and be innovative.
+        Before you generate the final question, consider engaging in a brief reasoning process.
+    
+    few_shots:
+        - role: user
+          content: |
+            ```txt
+            label: unfamiliar_word
+            abstract: abate
+            content:
+            [verb] to become less intense or widespread.
+            > The storm began to abate after several hours.
+            > She waited for the pain to abate before moving again.
+            ```
+        - role: assistant
+          content: |
+            Using "abate" in a natural and relatable context (e.g., a storm calming down) helps students connect the word to real-life scenarios, making it easier to remember.
+            ```json
+            {
+                "sentence": "The strong wind started to abate after the storm, making the weather calmer."
+            }
+            ```
