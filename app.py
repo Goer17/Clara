@@ -17,7 +17,8 @@ from utils.dictionary import (
 )
 from utils.questions import (
     GapFillingQuestion,
-    ListeningQuestion
+    ListeningQuestion,
+    Quiz
 )
 import time
 
@@ -44,7 +45,7 @@ def gen_gapfilling(generator, retriever, cnt):
     return question_list
 
 
-def gen_listening(generator: Generator, retriever: Retriever, cnt: int):
+def gen_listening(generator: Generator, retriever: Retriever, cnt: int) -> List[ListeningQuestion]:
     node_list = match_unfamiliar(retriever, limit=cnt)
     question_list = []
     async def addq(rela_nodes: List[MemoryNode]):
@@ -60,18 +61,32 @@ retriever = Retriever(gpt_4o)
 
 def listening():
     cnt = 5
-    question_list = gen_listening(generator, retriever, cnt)
-    for question in question_list:
-        name = tts_hd.generate(question.solution, "echo")
-        for i in range(3):
-            AMEngine.play(name)
-            time.sleep(2)
-        answer = input(f"{question.question()}\n:")
-        score, analysis, feedback = question.mark(answer, gpt_4o)
-        print(f"score: {score}")
-        print(f"analysis:\n{analysis}")
-        print(question.rela_nodes[0])
-        print(f"feedback:\n{feedback}")
+    filepath = "material/quiz/[2025-13-05 17:13].json"
+    quiz = Quiz.load(filepath)
+    print(quiz.problemset)
+    # for question in question_list:
+    #     name = tts_hd.generate(question.solution, "echo")
+    #     for i in range(3):
+    #         AMEngine.play(name)
+    #         time.sleep(2)
+    #     answer = input(f"{question.question()}\n: ")
+    #     score, analysis, feedback = question.mark(answer, gpt_4o)
+    #     print(f"score: {score}")
+    #     print(f"analysis:\n{analysis}")
+    #     print(question.rela_nodes[0])
+    #     print(f"feedback:\n{feedback}")
+    #     if score < 0.8:
+    #         continue
+    #     addition = int((score - 0.8) * 100)
+    #     for node in question.rela_nodes:
+    #         node.set_prop(
+    #             "familiarity",
+    #             node.get_prop("familiarity") + addition
+    #         )
+    #         if node.get_prop("familiarity") >= 100:
+    #             node.set_label("word")
+    #         node.update()
+                
 
 if __name__ == "__main__":
     dictionary = LLMDictionary(engine=gpt_4o)
@@ -85,7 +100,8 @@ if __name__ == "__main__":
             node_profile = {
                 "label": "unfamiliar_word",
                 "abstract": word,
-                "content": content
+                "content": content,
+                "familiarity": 0
             }
             node = retriever.remember(node_profile)
             print(f"> {node}")

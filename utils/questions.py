@@ -1,20 +1,21 @@
 from pathlib import Path
-import yaml
+import yaml, json
 from collections import defaultdict
 from abc import ABC, abstractmethod
-
+import datetime
 from typing import (
     Dict, List, Tuple
 )
 from agent.retriever import (
-    MemoryNode
+    MemoryNode,
+    MemoryManager
 )
 from utils.general import (
     LLMEngine,
     AMEngine
 )
 from utils.string import Formatter
-
+from .logger import logger
 
 prompts = Path("config") / "prompts" / "feedback.yml"
 with open(prompts) as f:
@@ -150,17 +151,24 @@ class ListeningQuestion(Question):
             sys_prompt=sys_prompt,
             few_shots=few_shots
         )
-        responses = Formatter.catch_json(responses)
-        feedbacks = []
-        for _, feedback in responses.items():
-            feedbacks.append(feedback)
-        
-        return feedbacks
-        
+        if "NO_ERROR" in responses:
+            return []
+        try:
+            responses = Formatter.catch_json(responses)
+            feedbacks = []
+            for _, feedback in responses.items():
+                feedbacks.append(feedback)
+            return feedbacks
+        except Exception as e:
+            logger.error("ListeningQuestion.__feedback() : an error occurred while attempting to generate the feedback of student's answer.", e)
+            return []
     
     def mark(self, answer, engine) -> Tuple[int, str, List[Dict[str, str]]]:
         score = 1 - self.__editing_dist(answer) / max(len(self.solution), len(answer))
-        feedbacks = self.__feedback(answer, engine)
+        if score < 1:
+            feedbacks = self.__feedback(answer, engine)
+        else:
+            feedbacks = []
 
         return score, self.analysis, feedbacks
 
@@ -175,11 +183,58 @@ class Quiz:
     def shell(self):
         pass
     
-    def save(self, path: str | Path) -> bool:
-        # TODO
-        pass
+    def save(self, path: str | Path = Path("material") / "quiz") -> str:
+        quiz_dat = {}
+        for question_type in self.problemset:
+            quiz_dat[question_type] = []
+            for q in self.problemset[question_type]:
+                q_dat = {
+                    "content": q.content,
+                    "solution": q.solution,
+                    "rela_nodes": []
+                }
+                if q.analysis:
+                    q_dat["analysis"] = q.analysis
+                for rela_node in q.rela_nodes:
+                    q_dat["rela_nodes"].append(rela_node.get_prop("m_id"))
+                quiz_dat[question_type].append(q_dat)
+        timestamp = datetime.datetime.now().strftime("%Y-%M-%d %H:%M")
+        if not isinstance(path, Path):
+            path = Path(path)
+        filepath = path / f"[{timestamp}].json"
+        with open(filepath, 'w') as f:
+            quiz_dat_str = json.dumps(quiz_dat)
+            f.write(quiz_dat_str)
+        
+        return filepath
     
     @staticmethod
-    def load(path: str | Path) -> 'Quiz':
-        # TODO
-        pass
+    def load(filepath: str | Path, memory: MemoryManager = MemoryManager()) -> 'Quiz':
+        with open(filepath) as f:
+            quiz_dat = json.load(f)
+        quiz = Quiz()
+        for question_type in quiz_dat:
+            if question_type not in [
+                "GapFillingQuestion",
+                "SentenceMakingQuestion",
+                "ListeningQuestion"
+            ]:
+                logger.error(f"Quiz.load() : unknown question class : {question_type}")
+                continue
+            question_class = eval(question_type)
+            for q_dat in quiz_dat[question_type]:
+                content = q_dat["content"]
+                solution = q_dat["solution"]
+                analysis = q_dat.get("analysis", None)
+                rela_nodes = []
+                for m_id in q_dat["rela_nodes"]:
+                    try:
+                        rela_node = memory.match_node(
+                            {"m_id": m_id}
+                        )[0]
+                        rela_nodes.append(rela_node)
+                    except Exception as e:
+                        logger.error(f"Quiz.load() : an error occurred while attempting to load a question from quiz : {filepath}", e)
+                q = question_class(content, solution, rela_nodes, analysis)
+                quiz.add(q)
+        return quiz

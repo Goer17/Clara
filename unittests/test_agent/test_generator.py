@@ -69,6 +69,7 @@ def test_listening(generator, retriever, cnt):
     for question in question_list:
         assert isinstance(question, ListeningQuestion)
 
+@pytest.mark.passed
 @pytest.mark.parametrize("cnt", [1, 2, 5, 10])
 def test_sentence_making(generator, retriever, cnt):
     node_list = match_unfamiliar(retriever, limit=cnt)
