@@ -175,9 +175,13 @@ class ListeningQuestion(Question):
 
 class Quiz:
     def __init__(self):
+        self.knowledges: List[MemoryNode] = []
         self.problemset: Dict[str, List[Question]] = defaultdict(list)
     
-    def add(self, q: Question):
+    def addn(self, node: MemoryNode):
+        self.knowledges.append(node)
+    
+    def addq(self, q: Question):
         self.problemset[type(q).__name__].append(q)
     
     def shell(self):
@@ -185,6 +189,9 @@ class Quiz:
     
     def save(self, path: str | Path = Path("material") / "quiz") -> str:
         quiz_dat = {}
+        quiz_dat["Knowledges"] = []
+        for node in self.knowledges:
+            quiz_dat["Knowledges"].append(node.get_prop("m_id"))
         for question_type in self.problemset:
             quiz_dat[question_type] = []
             for q in self.problemset[question_type]:
@@ -198,7 +205,7 @@ class Quiz:
                 for rela_node in q.rela_nodes:
                     q_dat["rela_nodes"].append(rela_node.get_prop("m_id"))
                 quiz_dat[question_type].append(q_dat)
-        timestamp = datetime.datetime.now().strftime("%Y-%M-%d %H:%M")
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
         if not isinstance(path, Path):
             path = Path(path)
         filepath = path / f"[{timestamp}].json"
@@ -211,8 +218,17 @@ class Quiz:
     @staticmethod
     def load(filepath: str | Path, memory: MemoryManager = MemoryManager()) -> 'Quiz':
         with open(filepath) as f:
-            quiz_dat = json.load(f)
+            quiz_dat: Dict = json.load(f)
         quiz = Quiz()
+        knowledges = quiz_dat.pop("Knowledges", [])
+        for m_id in knowledges:
+            try:
+                node = memory.match_node(
+                    {"m_id": m_id}
+                )[0]
+                quiz.addn(node)
+            except Exception as e:
+                logger.error(f"Quiz.load() : an error ocurred while attempting to load a knowledge from quiz {filepath}", e)
         for question_type in quiz_dat:
             if question_type not in [
                 "GapFillingQuestion",

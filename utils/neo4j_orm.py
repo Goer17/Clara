@@ -270,6 +270,8 @@ class Graph:
             )
 
 class Node:
+    nodes = {}
+    
     def __init__(self):
         self.__graph: Graph = None
         self.m_id = None
@@ -282,6 +284,8 @@ class Node:
 
     @classmethod
     def _create(cls, graph: Graph, m_id: int, label: str, properties: Dict[str, str | int | float]) -> 'Node':
+        if m_id in Node.nodes:
+            return Node.nodes[m_id]
         instance = cls.__new__(cls)
         instance.__graph = graph
         instance.m_id = m_id
@@ -290,7 +294,8 @@ class Node:
         instance._alive = True
         instance._new_properties = {}
         instance._removed_properties = []
-        
+        Node.nodes[m_id] = instance
+
         return instance
 
     @staticmethod

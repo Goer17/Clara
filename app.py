@@ -60,32 +60,29 @@ generator = Generator(gpt_4o)
 retriever = Retriever(gpt_4o)
 
 def listening():
-    cnt = 5
-    filepath = "material/quiz/[2025-13-05 17:13].json"
-    quiz = Quiz.load(filepath)
-    print(quiz.problemset)
-    # for question in question_list:
-    #     name = tts_hd.generate(question.solution, "echo")
-    #     for i in range(3):
-    #         AMEngine.play(name)
-    #         time.sleep(2)
-    #     answer = input(f"{question.question()}\n: ")
-    #     score, analysis, feedback = question.mark(answer, gpt_4o)
-    #     print(f"score: {score}")
-    #     print(f"analysis:\n{analysis}")
-    #     print(question.rela_nodes[0])
-    #     print(f"feedback:\n{feedback}")
-    #     if score < 0.8:
-    #         continue
-    #     addition = int((score - 0.8) * 100)
-    #     for node in question.rela_nodes:
-    #         node.set_prop(
-    #             "familiarity",
-    #             node.get_prop("familiarity") + addition
-    #         )
-    #         if node.get_prop("familiarity") >= 100:
-    #             node.set_label("word")
-    #         node.update()
+    question_list = gen_listening(generator, retriever, 5)
+    for question in question_list:
+        name = tts_hd.generate(question.solution, "echo")
+        for i in range(3):
+            AMEngine.play(name)
+            time.sleep(2)
+        answer = input(f"{question.question()}\n: ")
+        score, analysis, feedback = question.mark(answer, gpt_4o)
+        print(f"score: {score}")
+        print(f"analysis:\n{analysis}")
+        print(question.rela_nodes[0])
+        print(f"feedback:\n{feedback}")
+        if score < 0.8:
+            continue
+        addition = int((score - 0.8) * 100)
+        for node in question.rela_nodes:
+            node.set_prop(
+                "familiarity",
+                node.get_prop("familiarity") + addition
+            )
+            if node.get_prop("familiarity") >= 100:
+                node.set_label("word")
+            node.update()
                 
 
 if __name__ == "__main__":
