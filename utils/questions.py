@@ -1,4 +1,6 @@
+import random
 from pathlib import Path
+import subprocess
 import yaml, json
 from collections import defaultdict
 from abc import ABC, abstractmethod
@@ -11,6 +13,7 @@ from agent.retriever import (
     MemoryManager
 )
 from utils.general import (
+    gpt_4o, tts_hd,
     LLMEngine,
     AMEngine
 )
@@ -62,7 +65,7 @@ class GapFillingQuestion(Question):
     def question(self, hint = False) -> str:
         blank = "_" * len(self.solution)
         if hint:
-            blank[0] = self.solution[0]
+            blank = self.solution[0] + blank[1:]
         q = self.content.replace("$BLANK", blank)
 
         return q
@@ -165,7 +168,7 @@ class ListeningQuestion(Question):
     
     def mark(self, answer, engine) -> Tuple[int, str, List[Dict[str, str]]]:
         score = 1 - self.__editing_dist(answer) / max(len(self.solution), len(answer))
-        if score < 1:
+        if score < 1 and len(answer):
             feedbacks = self.__feedback(answer, engine)
         else:
             feedbacks = []
@@ -185,7 +188,54 @@ class Quiz:
         self.problemset[type(q).__name__].append(q)
     
     def shell(self):
-        pass
+        def _clear():
+            subprocess.run("clear", shell=True)
+        for idx, node in enumerate(self.knowledges):
+            print(f"{idx + 1}. {node.get_prop('abstract')}")
+            print(node.get_prop('content'))
+            input("> Press ENTER to continue :")
+            _clear()
+        for idx, (q_type, q_list) in enumerate(self.problemset.items()):
+            print(f"PART {idx + 1} : {q_type}")
+            input("> Press ENTER to start :")
+            _clear()
+            scale, low = 1, 0
+            if q_type == "GapFillingQuestion":
+                scale, low = 10, 0
+            elif q_type == "ListeningQuestion":
+                scale, low = 20, 0.7
+            else:
+                continue
+            for q in q_list:
+                print("=" * 30)
+                print(q.question(hint=True))
+                print("\n")
+                if q_type == "ListeningQuestion":
+                    voice = random.choice(
+                        ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']
+                    )
+                    name = tts_hd.generate(q.solution, voice)
+                    for i in range(2):
+                        AMEngine.play(name)
+                answer = input("> ")
+                score, analysis, _ = q.mark(answer, gpt_4o)
+                print(f"\n* score : {score}")
+                print(f"solution : {q.solution}")
+                if analysis:
+                    print(f"* analysis :\n{analysis}")
+                input("> Press ENTER to continue :")
+                _clear()
+                k = max(-5, int(scale * (score - low)))
+                for node in q.rela_nodes:
+                    familiarity = node.get_prop("familiarity")
+                    if familiarity is None:
+                        familiarity = 0
+                    familiarity += k
+                    node.set_prop("familiarity", familiarity)
+                    if familiarity >= 100:
+                        if node.label == "unfamiliar_word":
+                            node.set_label("word")
+                    node.update()
     
     def save(self, path: str | Path = Path("material") / "quiz") -> str:
         quiz_dat = {}
@@ -252,5 +302,5 @@ class Quiz:
                     except Exception as e:
                         logger.error(f"Quiz.load() : an error occurred while attempting to load a question from quiz : {filepath}", e)
                 q = question_class(content, solution, rela_nodes, analysis)
-                quiz.add(q)
+                quiz.addq(q)
         return quiz
