@@ -1,21 +1,14 @@
 from utils.general import (
-    gpt_4o,
-    tts_hd
+    gpt_4o
 )
 
-from agent.retriever import Retriever
-from agent.generator import Generator
-from agent.planner import Planner
-
-retriever = Retriever(gpt_4o)
-generator = Generator(gpt_4o)
-planner = Planner(gpt_4o, retriever, generator)
+from agent.instances import (
+    retriever, generator, planner
+)
 
 from utils.dictionary import LLMDictionary, to_text
 
 dictionaty = LLMDictionary(gpt_4o)
-
-from utils.questions import Quiz
 
 def add_words():
     while True:
@@ -23,17 +16,21 @@ def add_words():
         if w == ":exit":
             break
         else:
-            content = to_text(dictionaty(w))
-            if content:
-                node_profile = {
-                    "label": "unfamiliar_word",
-                    "abstract": w.lower(),
-                    "content": content,
-                    "familiarity": 0
-                }
-                retriever.remember(
-                    node_profile
-                )
+            try:
+                content = to_text(dictionaty(w))
+                if content:
+                    node_profile = {
+                        "label": "unfamiliar_word",
+                        "abstract": w.lower(),
+                        "content": content,
+                        "familiarity": 0
+                    }
+                    node = retriever.remember(
+                        node_profile
+                    )
+                    print(f"* added one node : {node}")
+            except Exception as e:
+                pass
 
 def learning():
     n = 5
@@ -51,3 +48,5 @@ if __name__ == "__main__":
             add_words()
         elif cmd == "quiz":
             learning()
+        elif cmd == "exit":
+            break

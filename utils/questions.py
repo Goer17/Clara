@@ -20,6 +20,10 @@ from utils.general import (
 from utils.string import Formatter
 from .logger import logger
 
+from agent.instances import (
+    retriever
+)
+
 prompts = Path("config") / "prompts" / "feedback.yml"
 with open(prompts) as f:
     all_prompts = yaml.safe_load(f)
@@ -190,6 +194,7 @@ class Quiz:
     def shell(self):
         def _clear():
             subprocess.run("clear", shell=True)
+        _clear()
         for idx, node in enumerate(self.knowledges):
             print(f"{idx + 1}. {node.get_prop('abstract')}")
             print(node.get_prop('content'))
@@ -207,6 +212,8 @@ class Quiz:
             else:
                 continue
             for q in q_list:
+                w = q.rela_nodes[0]
+                mistake = q.rela_nodes[1] if len(q.rela_nodes) > 1 else None
                 print("=" * 30)
                 print(q.question(hint=True))
                 print("\n")
@@ -218,7 +225,28 @@ class Quiz:
                     for i in range(2):
                         AMEngine.play(name)
                 answer = input("> ")
-                score, analysis, _ = q.mark(answer, gpt_4o)
+                score, analysis, feedbacks = q.mark(answer, gpt_4o)
+                try:
+                    if q_type in ["ListeningQuestion"] and score <= low and len(feedbacks) > 0:
+                        mistake_abstract = ", ".join(v["abstract"] for v in feedbacks) if not mistake else mistake.get_prop("mistake")
+                        mistake_feedbacks = "\n".join(f"{v['abstract']} : {v['content']}" for v in feedbacks)
+                        mistake_content = (
+                            f"question: {q.question(hint=True)}\n"
+                            f"solution: {q.solution}\n"
+                            f"student's answer: {answer}\n"
+                            f"feedbacks : {mistake_feedbacks}"
+                        )
+                        node_profile = {
+                            "label": "mistake",
+                            "abstract": mistake_abstract,
+                            "type": q_type,
+                            "content": mistake_content,
+                            "familiarity": 0
+                        }
+                        node = retriever.remember(node_profile, 0)
+                        node.create_rela(w, "relative", {})
+                except Exception as e:
+                    logger.error(f"Quiz.shell() : an error occurred while attempting to generate a mistake node of {w.get_prop('abstract')}", e)
                 print(f"\n* score : {score}")
                 print(f"solution : {q.solution}")
                 if analysis:
@@ -235,7 +263,10 @@ class Quiz:
                     if familiarity >= 100:
                         if node.label == "unfamiliar_word":
                             node.set_label("word")
-                    node.update()
+                            node.update()
+                        elif node.label == "mistake":
+                            node.destroy()
+        print("> This quiz was completed!")
     
     def save(self, path: str | Path = Path("material") / "quiz") -> str:
         quiz_dat = {}
@@ -266,14 +297,14 @@ class Quiz:
         return filepath
     
     @staticmethod
-    def load(filepath: str | Path, memory: MemoryManager = MemoryManager()) -> 'Quiz':
+    def load(filepath: str | Path) -> 'Quiz':
         with open(filepath) as f:
             quiz_dat: Dict = json.load(f)
         quiz = Quiz()
         knowledges = quiz_dat.pop("Knowledges", [])
         for m_id in knowledges:
             try:
-                node = memory.match_node(
+                node = retriever.match_node(
                     {"m_id": m_id}
                 )[0]
                 quiz.addn(node)
@@ -295,7 +326,7 @@ class Quiz:
                 rela_nodes = []
                 for m_id in q_dat["rela_nodes"]:
                     try:
-                        rela_node = memory.match_node(
+                        rela_node = retriever.match_node(
                             {"m_id": m_id}
                         )[0]
                         rela_nodes.append(rela_node)

@@ -190,8 +190,8 @@ class Retriever:
             sys_prompt = self.all_prompts["create_rela_word2word"]["sys_prompt"]
             few_shots = self.all_prompts["create_rela_word2word"]["few_shots"]
         else:
-            # TODO
-            pass
+            sys_prompt = self.all_prompts["create_rela_others"]["sys_prompt"]
+            few_shots = self.all_prompts["ccreate_rela_others"]["few_shots"]
         prompt = f"{n1.text(enclose=True)}\n{n2.text(enclose=True)}"
         
         return sys_prompt, few_shots, prompt
@@ -207,6 +207,8 @@ class Retriever:
             return None
         try:
             response = Formatter.catch_json(response)
+            if "label" not in response:
+                response["label"] = "relative"
             return response
         except Exception as e:
             logger.error(f"Retriever.__gen_rela() : an error occurred while attempting to generate the relationship between 2 nodes:\n{n1}\n{n2}", e)
@@ -218,6 +220,14 @@ class Retriever:
                    limit: int | None = None
                    ) -> List[MemoryNode]:
         return self.memory.match_node(node_profile, order, limit)
+    
+    def match(self,
+              from_prop: Dict[str, str | int | float],
+              to_prop: Dict[str, str | int | float],
+              rela_prop: Dict[str, str | int | float],
+              bidirect: bool = False
+              ) -> List[Tuple[MemoryNode, Relationship, MemoryNode]]:
+        return self.memory.match(from_prop, to_prop, rela_prop, bidirect)
         
     def remember(self, node_profile: Dict[str, str | int | float], n_rela: int = 5) -> MemoryNode:
         async def gen_rela(fr: MemoryNode, to: MemoryNode):
@@ -226,8 +236,8 @@ class Retriever:
                 label = rela.pop("label")
                 fr.create_rela(to, label, rela)
         try:
-            sim_nodes = self.memory.query(node_profile["abstract"], n_rela)
-            if len(sim_nodes) > 0 and sim_nodes[0].get_prop("abstract") == node_profile["abstract"]:
+            sim_nodes = self.memory.query(node_profile["abstract"], n_rela) if n_rela > 0 else []
+            if len(sim_nodes) > 0 and sim_nodes[0].label == node_profile["label"] and sim_nodes[0].get_prop("abstract") == node_profile["abstract"]:
                 # TODO merge the memory
                 return sim_nodes[0]
             node = self.memory.add_node(node_profile)

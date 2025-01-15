@@ -1,4 +1,4 @@
-import asyncio
+import asyncio, random
 
 from typing import (
     Dict, Tuple
@@ -60,9 +60,21 @@ class Planner:
                     logger.error(f"Quiz.load() : unknown question class : {q_type}")
                     continue
                 for i in range(cnt):
-                    # TODO add mistake nodes
+                    node = nodes[i % n]
+                    matchs = self.retriever.match(
+                        from_prop={"m_id": node.get_prop("m_id")},
+                        to_prop={"label": "mistake", "type": q_type},
+                        rela_prop={"label": "relative"},
+                        bidirect=True
+                    )
+                    mistakes = [match[3] for match in matchs]
+                    rela_nodes = [node]
+                    if len(mistakes) > 0:
+                        rela_nodes.append(
+                            random.choices(mistakes)[0]
+                        )
                     coro_list.append(
-                        _addq(q_type, [nodes[i % n]])
+                        _addq(q_type, rela_nodes)
                     )
             asyncio.run(asyncio.wait(coro_list, timeout=None))
             filepath = quiz.save()
