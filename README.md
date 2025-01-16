@@ -12,5 +12,6 @@
 
 - [X] Implement the ORM Model of Neo4j
 - [X] Implement the ORM Memory Class and ORM Retriever
-- [ ] Other question : sentence-making & listening
-- [ ] Quiz shell interaction & Mistake node
+- [X] Other question : sentence-making & listening
+- [X] Quiz shell interaction & Mistake node
+- [ ] GUI

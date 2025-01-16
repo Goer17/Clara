@@ -10,7 +10,8 @@ from typing import (
 )
 from agent.retriever import (
     MemoryNode,
-    MemoryManager
+    MemoryManager,
+    Retriever
 )
 from utils.general import (
     gpt_4o, tts_hd,
@@ -20,9 +21,7 @@ from utils.general import (
 from utils.string import Formatter
 from .logger import logger
 
-from agent.instances import (
-    retriever
-)
+retriever = Retriever(gpt_4o)
 
 prompts = Path("config") / "prompts" / "feedback.yml"
 with open(prompts) as f:
@@ -85,13 +84,35 @@ class SentenceMakingQuestion(Question):
     def question(self, hint = False):
         return self.content
 
-    def __feedback(self, answer: str) -> List[Dict[str, str]]:
-        # TODO
-        pass
+    def __feedback(self, answer: str, engine: LLMEngine) -> Tuple[List[str], str]:
+        sys_prompt, few_shots = all_prompts["SentenceMakingQuestion"]["sys_prompt"], all_prompts["SentenceMakingQuestion"]["few_shots"]
+        prompt = (
+            f"scenario: {self.content}\n",
+            f"answer: {self.solution}\n",
+            f"lang: {', '.join(self.analysis)}\n",
+            f"student's answer: {answer}\n"
+        )
+        prompt = f"```txt\n{prompt}```"
+        try:
+            response = engine.generate(prompt, sys_prompt, few_shots)
+            response = Formatter.catch_json(response)
+            return response["mistakes"], response["polished"]
+        except Exception as e:
+            logger.error(f"SentenceMakingQuestion.__feedback() : an error ocurred while attempting to generate feedback of student's answer: {answer}", e)
+            return []
     
     def mark(self, answer, engine):
-        # TODO
-        pass
+        mistakes, polished = self.__feedback(answer, engine)
+        score = max(0, 1 - len(mistakes) / 4)
+        feedbacks = [
+            {
+                "abstract": ", ".join(mistakes),
+                "content": f"Polished version: {polished}"
+            }
+        ]
+        
+        return score, self.analysis, feedbacks
+        
 
 class ListeningQuestion(Question):
     def __init__(self, content, solution, rela_nodes, analysis = None, *args, **kwargs):
@@ -209,6 +230,8 @@ class Quiz:
                 scale, low = 10, 0
             elif q_type == "ListeningQuestion":
                 scale, low = 20, 0.7
+            elif q_type == "SentenceMakingQuestion":
+                scale, low = 20, 0.6
             else:
                 continue
             for q in q_list:
@@ -227,7 +250,7 @@ class Quiz:
                 answer = input("> ")
                 score, analysis, feedbacks = q.mark(answer, gpt_4o)
                 try:
-                    if q_type in ["ListeningQuestion"] and score <= low and len(feedbacks) > 0:
+                    if q_type in ["ListeningQuestion", "SentenceMakingQuestion"] and score <= low and len(feedbacks) > 0:
                         mistake_abstract = ", ".join(v["abstract"] for v in feedbacks) if not mistake else mistake.get_prop("mistake")
                         mistake_feedbacks = "\n".join(f"{v['abstract']} : {v['content']}" for v in feedbacks)
                         mistake_content = (

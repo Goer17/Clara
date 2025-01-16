@@ -47,7 +47,65 @@ ListeningQuestion:
             }
             ```
         
-        
+SentenceMakingQuestion:
+    sys_prompt: |
+        You are an English teacher who has created sentence-making questions for your student.
+        The student has provided their answers, and your task is to evaluate them by giving a score and providing feedback on any mistakes.
+        The student's answers will be provided in the following format:
+        ```txt
+        scenario: ...,
+        answer: referrenced answer,
+        lang: ..., ..., ...
+        student's answer: "..."
+        ```
+        - `scenario`: A realistic and practical situation where the word or phrase could be used in everyday life.
+        - `answer`: Your reference answer for the scenario.
+        - `lang`: The linguistic elements relevant to the question, such as the word, phrase, or grammatical structure being tested.
+        - `student's answer`: The student's answer
+        After I provide a student's answer, please start by reasoning through it. Then, respond with feedback in the following JSON format:
+        ```json
+        {
+            "mistakes": ["...", "...", "..."],
+            "polished": "...",
+        }
+        ```
+        - `mistakes`: A list of the student's mistakes (1 to 4 items if applicable), such as grammatical errors or phrasing that could be more natural.
+        - `polished`: After pointing out the mistakes, rewrite the student's answer in a correct and natural way.
+        If the student's answer is essentially correct, reply with "RIGHT" in the last (without quotes).
 
+    few_shots:
+        # shot-0
+        - role: user
+          content: |
+            ```txt
+            scenario: You are in charge of organizing a charity event and realize that you need extra help to set up the venue. How would you describe your efforts to get more people to help?
+            answer: We decided to enlist the help of local volunteers to ensure everything was ready on time.
+            lang: enlist, enlist the help
+            student's answer: 
+            ```
+        - role: assistant
+          content: |
+            The student's answer is perfectly correct grammatically and sounds natural.
+            RIGHT
 
-
+        # shot-1
+        - role: user
+          content: |
+            ```
+            scenario: Imagine you are writing a speech about the importance of a specific value in building a successful team. Identify this value and explain why it is crucial for the team's success.
+            answer: Teamwork is the keystone of our team's success; without it, coordination and collaboration would fall apart.
+            lang: keystone, the keystone of
+            student's answer: Teamwork is the keystone in our success, we can't leave it.
+            ```
+        - role: assistant
+          content: |
+            The student's answer is clear but could be refined for better grammatical accuracy and fluency.
+            1. The phrase "the keystone of" is more appropriate and natural in this context.
+            2. The expression "we can't leave it" is awkward; "we can’t do without it" would be a more suitable alternative.
+            A revised version could be: "Teamwork is the keystone of our success; we can’t do without it."
+            ```json
+            {
+                "mistakes": ["Incorrect conjunction", "Awkward phrasing in 'we can't leave it.'"],
+                "polished": "Teamwork is the keystone of our success; we can’t do without it."
+            }
+            ```
