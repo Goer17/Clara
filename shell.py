@@ -5,7 +5,6 @@ from agent.retriever import Retriever
 from agent.generator import Generator
 from agent.planner import Planner
 
-
 generator = Generator(gpt_4o)
 retriever = Retriever(gpt_4o)
 planner = Planner(gpt_4o, retriever, generator)
@@ -41,10 +40,10 @@ def learning():
     quiz_profile = {
         "GapFillingQuestion": 2 * n,
         "ListeningQuestion": n,
-        "SentenceMakingQuestion": n
+        # "SentenceMakingQuestion": n
     }
     filename, quiz = planner.gen_quiz(n, quiz_profile)
-    quiz.shell()
+    quiz.shell(retriever=retriever)
 
 if __name__ == "__main__":
     while True:

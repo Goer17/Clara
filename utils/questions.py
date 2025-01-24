@@ -21,8 +21,6 @@ from utils.general import (
 from utils.string import Formatter
 from .logger import logger
 
-retriever = Retriever(gpt_4o)
-
 prompts = Path("config") / "prompts" / "feedback.yml"
 with open(prompts) as f:
     all_prompts = yaml.safe_load(f)
@@ -95,13 +93,17 @@ class SentenceMakingQuestion(Question):
         prompt = f"```txt\n{prompt}```"
         try:
             response = engine.generate(prompt, sys_prompt, few_shots)
+            if "RIGHT" in response:
+                return [], ""
             response = Formatter.catch_json(response)
             return response["mistakes"], response["polished"]
         except Exception as e:
             logger.error(f"SentenceMakingQuestion.__feedback() : an error ocurred while attempting to generate feedback of student's answer: {answer}", e)
-            return []
+            return [], ""
     
     def mark(self, answer, engine):
+        if len(answer) == 0:
+            return 0, self.analysis, []
         mistakes, polished = self.__feedback(answer, engine)
         score = max(0, 1 - len(mistakes) / 4)
         feedbacks = [
@@ -212,7 +214,7 @@ class Quiz:
     def addq(self, q: Question):
         self.problemset[type(q).__name__].append(q)
     
-    def shell(self):
+    def shell(self, retriever: Retriever):
         def _clear():
             subprocess.run("clear", shell=True)
         _clear()
@@ -283,6 +285,8 @@ class Quiz:
                         familiarity = 0
                     familiarity += k
                     node.set_prop("familiarity", familiarity)
+                    node.update()
+                    logger.info(f"Quiz.shell() : updated [familiarity ({k})] {node}")
                     if familiarity >= 100:
                         if node.label == "unfamiliar_word":
                             node.set_label("word")
@@ -320,7 +324,7 @@ class Quiz:
         return filepath
     
     @staticmethod
-    def load(filepath: str | Path) -> 'Quiz':
+    def load(filepath: str | Path, retriever: Retriever) -> 'Quiz':
         with open(filepath) as f:
             quiz_dat: Dict = json.load(f)
         quiz = Quiz()

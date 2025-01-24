@@ -1,0 +1,54 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+}
+
+.header {
+    width: 100%;
+    height: 60px;
+    background-color: #28a745;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navigator {
+    width: 200px;
+    background-color: #ffffff; /* 白色背景 */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* 右侧阴影 */
+    height: 100vh; /* 占满整个视口高度 */
+    position: fixed; /* 固定定位 */
+    top: 0;
+    left: 0;
+    padding-top: 80px; /* 留出与 header 的间距 */
+    display: flex;
+    flex-direction: column; /* 垂直排列导航链接 */
+}
+
+.navigator a {
+    text-decoration: none; /* 移除下划线 */
+    color: #333; /* 默认文字颜色 */
+    padding: 15px 20px; /* 内边距增加点击区域 */
+    font-size: 16px; /* 字体大小 */
+    border-bottom: 1px solid #eaeaea; /* 下边框分隔 */
+    transition: background-color 0.3s, color 0.3s; /* 悬停过渡效果 */
+}
+
+.navigator a:hover {
+    background-color: #f0f0f0; /* 悬停时背景变灰 */
+    color: #007bff; /* 文字变蓝色 */
+}
+
+.content {
+    margin-left: 220px; /* 为 navigator 留出空间 */
+    padding: 20px;
+}
+
+.footer {
+    width: 100%;
+    height: 40px;
+    background-color: #f1f1f1;
+    text-align: center;
+    line-height: 40px;
+    font-size: 14px;
+    color: #666;
+}

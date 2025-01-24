@@ -67,7 +67,7 @@ class Planner:
                         rela_prop={"label": "relative"},
                         bidirect=True
                     )
-                    mistakes = [match[3] for match in matchs]
+                    mistakes = [match[2] for match in matchs]
                     rela_nodes = [node]
                     if len(mistakes) > 0:
                         rela_nodes.append(

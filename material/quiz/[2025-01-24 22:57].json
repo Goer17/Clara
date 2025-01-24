@@ -1,0 +1,120 @@
+{
+    "Knowledges": [
+        "2puaM4D9Yr9dneQvz3oXfb",
+        "3ecpfkS5rHtcHw4AqtGLBL",
+        "YbC4pYoVF2TuZmSgefKGwb",
+        "ehnM5WyniiSk52HZs642yV",
+        "fNWG5pAD74eT5csN7P9F3W"
+    ],
+    "ListeningQuestion": [
+        {
+            "content": "",
+            "solution": "The festival's closing ceremony was a spectacular display of lights and music that captivated everyone.",
+            "rela_nodes": [
+                "2puaM4D9Yr9dneQvz3oXfb",
+                "eLyi2rcL8AUCnMLinnXgqi"
+            ]
+        },
+        {
+            "content": "",
+            "solution": "The teacher decided to impose extra homework to help students improve their skills.",
+            "rela_nodes": [
+                "ehnM5WyniiSk52HZs642yV"
+            ]
+        },
+        {
+            "content": "",
+            "solution": "The elephant was enormous, larger than any animal in the zoo.",
+            "rela_nodes": [
+                "fNWG5pAD74eT5csN7P9F3W"
+            ]
+        },
+        {
+            "content": "",
+            "solution": "They had a trivial argument about who would wash the dishes.",
+            "rela_nodes": [
+                "YbC4pYoVF2TuZmSgefKGwb"
+            ]
+        },
+        {
+            "content": "",
+            "solution": "The tempting smell of pizza made him enter the new pizzeria on the corner.",
+            "rela_nodes": [
+                "3ecpfkS5rHtcHw4AqtGLBL",
+                "gCvGaHy2uFXykVuZ6fNpEu"
+            ]
+        }
+    ],
+    "GapFillingQuestion": [
+        {
+            "content": "The authorities decided to $BLANK additional rules to curb the rising crime in the area.",
+            "solution": "impose",
+            "rela_nodes": [
+                "ehnM5WyniiSk52HZs642yV"
+            ]
+        },
+        {
+            "content": "Many people felt that it was unfair to $BLANK the strict rules so suddenly.",
+            "solution": "impose",
+            "rela_nodes": [
+                "ehnM5WyniiSk52HZs642yV"
+            ]
+        },
+        {
+            "content": "The sunset over the ocean was so $BLANK that everyone stopped to take pictures.",
+            "solution": "spectacular",
+            "rela_nodes": [
+                "2puaM4D9Yr9dneQvz3oXfb"
+            ]
+        },
+        {
+            "content": "He found the task to be quite $BLANK, requiring very little time and effort.",
+            "solution": "trivial",
+            "rela_nodes": [
+                "YbC4pYoVF2TuZmSgefKGwb"
+            ]
+        },
+        {
+            "content": "Once you break it down, the problem is quite $BLANK.",
+            "solution": "trivial",
+            "rela_nodes": [
+                "YbC4pYoVF2TuZmSgefKGwb"
+            ]
+        },
+        {
+            "content": "The brightly lit windows $BLANK many shoppers to enter the store even if they didn't plan to buy anything.",
+            "solution": "tempt",
+            "rela_nodes": [
+                "3ecpfkS5rHtcHw4AqtGLBL"
+            ]
+        },
+        {
+            "content": "The delicious aroma from the bakery windows could easily $BLANK those on a diet.",
+            "solution": "tempt",
+            "rela_nodes": [
+                "3ecpfkS5rHtcHw4AqtGLBL"
+            ]
+        },
+        {
+            "content": "The elephant at the zoo was so $BLANK that it drew everyone's attention.",
+            "solution": "enormous",
+            "rela_nodes": [
+                "fNWG5pAD74eT5csN7P9F3W"
+            ]
+        },
+        {
+            "content": "The sunset over the ocean was so $BLANK that it left everyone speechless.",
+            "solution": "spectacular",
+            "rela_nodes": [
+                "2puaM4D9Yr9dneQvz3oXfb"
+            ]
+        },
+        {
+            "content": "The new shopping mall was so $BLANK that it could fit an entire amusement park inside.",
+            "solution": "enormous",
+            "rela_nodes": [
+                "fNWG5pAD74eT5csN7P9F3W"
+            ]
+        }
+    ]
+}

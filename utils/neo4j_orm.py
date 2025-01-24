@@ -201,17 +201,23 @@ class Graph:
             for record in result:
                 p, q = record['p'], record['q']
                 p_labels, q_labels = p.labels, q.labels
+                for label in p_labels:
+                    if label != "memory":
+                        p_label = label
+                for label in q_labels:
+                    if label != "memory":
+                        q_label = label
                 p_prop, q_prop = dict(p), dict(q)
                 node_p = Node._create(
                     graph=self,
                     m_id=p_prop["m_id"],
-                    labels=p_labels,
+                    label=p_label,
                     properties=p_prop
                 )
                 node_q = Node._create(
                     graph=self,
                     m_id=q_prop["m_id"],
-                    labels=q_labels,
+                    label=q_label,
                     properties=q_prop
                 )
                 r = record['r']
