@@ -1,7 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}Index{% endblock title %}
+{% block title %}Clara - Index{% endblock title %}
+
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock style %}
 
 {% block content %}
-<h1>Index</h1>
+<div id="content-body">
+    <div id="chatbox">
+        <h3 id="title">Chat Box</h3>
+        <div id="messages">
+        </div>
+        <textarea id="input" placeholder="Enter your text here..."></textarea>
+        <button id="send">send</button>
+        <button id="reset"><span style="font-size: 1.3em;">🆑</span></button>
+    </div>
+    <div id="dictionary">
+        <h4 id="title">Dictionary</h4>
+    </div>
+</div>
+<script>
+    const chatHistory = {{ chat_history | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock content %}

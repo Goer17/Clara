@@ -4,6 +4,7 @@ bp = Blueprint('index', __name__, url_prefix='/')
 
 @bp.route("/", methods=["GET", "POST"])
 def index():
+    chat_history = session.get("chat_history", [])
     return render_template(
-        "index/index.html"
+        "index/index.html", chat_history=chat_history
     )

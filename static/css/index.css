@@ -1,0 +1,167 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f9f6;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    overflow: hidden; /* 防止滚动条出现 */
+}
+
+#content-body {
+    position: relative; /* 确保内部绝对定位元素以此为基准 */
+    width: 100%;
+    height: 100vh; /* 高度占满整个页面 */
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#chatbox {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 60%; /* 固定宽度，保持紧凑布局 */
+    height: 80%; /* 高度固定为容器的 80% */
+    background-color: #ffffff;
+    border: 2px solid #3bb273;
+    border-radius: 12px 12px 12px 12px; /* 右侧圆角，左侧贴合 */
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 16px;
+    gap: 12px;
+}
+
+#dictionary {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30%; /* 固定宽度，保持紧凑布局 */
+    height: 80%; /* 高度固定为容器的 80% */
+    background-color: #ffffff;
+    border: 2px solid #3bb273;
+    border-radius: 12px 12px 12px 12px; /* 右侧圆角，左侧贴合 */
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+}
+
+#title {
+    font-size: 1.5rem;
+    color: #3bb273;
+    text-align: center;
+    margin: 0;
+}
+
+#messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    padding: 8px;
+    border: 1px solid #d4e3db;
+    border-radius: 8px;
+    background-color: #f0f7f3;
+}
+
+.message {
+    display: block;
+    margin: 8px 0;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    
+}
+
+.message.user {
+    background-color: #8effbb;
+    color: #2c664c;
+    align-self: flex-end;
+}
+
+.message.assistant {
+    background-color: #f1f8ff;
+    color: #2c3e50;
+    align-self: flex-start;
+}
+
+.message pre {
+    width: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word; /* 支持旧版浏览器 */
+    overflow-wrap: break-word; /* 标准属性，现代浏览器支持 */
+}
+
+#input {
+    width: 97%;
+    border: 1px solid #d4e3db;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 1rem;
+    margin-right: 8px;
+    resize: none;
+    height: 60px;
+    max-height: 100px;
+    overflow-y: auto; /* 超过高度时出现滚动条 */
+    transition: height 0.2s ease;
+}
+
+button {
+    padding: 10px 16px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button#send {
+    background-color: #3bb273;
+    color: #ffffff;
+}
+
+button#send:hover {
+    background-color: #2a8a5e;
+}
+
+button#reset {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60px;
+    height: 40px;
+    background-color: #e57373;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 8px;
+    margin-right: 15px;
+}
+
+button#reset:hover {
+    background-color: #c64848;
+}
+
+@media (max-width: 600px) {
+    #chatbox {
+        width: 100%; /* 在小屏幕上占满宽度 */
+        height: 80%; /* 保持 80% 的高度 */
+        border-radius: 0; /* 去掉圆角适配全宽 */
+    }
+
+    #title {
+        font-size: 1.2rem;
+    }
+
+    #input {
+        font-size: 0.9rem;
+    }
+
+    button {
+        font-size: 0.9rem;
+    }
+}

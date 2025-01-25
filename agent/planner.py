@@ -1,7 +1,7 @@
 import asyncio, random
 
 from typing import (
-    Dict, Tuple
+    List, Dict, Tuple
 )
 from agent.generator import (
     Generator
@@ -27,6 +27,13 @@ class Planner:
         self.engine = engine
         self.retriever = retriever
         self.generator = generator
+    
+    def chat(self, messages: List[Dict]) -> str:
+        try:
+            response = self.engine.chat(messages)
+            return response
+        except Exception as e:
+            logger.error(f"Planner.chat() : one error occurred while attempting to chat with planner.", e)
     
     def gen_quiz(self, node_number: int, profile: Dict[str, int]) -> Tuple[str, Quiz]:
         try:

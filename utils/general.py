@@ -79,6 +79,17 @@ class LLMEngine:
         logger.info(f"LLMEngine.generate() [{self.model}] : {response}")
         return response
     
+    def chat(self, messages: List[Dict], sys_prompt: str | Prompt | None = "", *args, **kwargs) -> str:
+        sys_prompt = sys_prompt.value() if isinstance(sys_prompt, Prompt) else sys_prompt
+        messages = [{"role": "system", "content": sys_prompt}] + messages
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            *args, **kwargs
+        ).choices[0].message.content
+        logger.info(f"LLMEngine.chat() [{self.model}] : {response}")
+        return response
+    
     async def async_generate(self, prompt: str | Prompt | None = None, sys_prompt: str | Prompt | None = None, few_shots: List[Dict] = [],
                              *args, **kwargs) -> str:
         messages = self.__pack_message(
