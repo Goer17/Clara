@@ -42,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             const data = await response.json();
-            console.log(data)
             if (data.reply) {
                 appendMessage("assistant", data.reply);
             } else {
@@ -78,4 +77,75 @@ document.addEventListener("DOMContentLoaded", () => {
             sendMessage();
         }
     });
+
+    const wordInput = document.getElementById("word");
+    const searchButton = document.getElementById("search");
+    const addButton = document.getElementById("add");
+    const deleteButton = document.getElementById("delete");
+    const result = document.getElementById("result");
+    var cur_word = "";
+    var cur_content = "";
+
+    async function search() {
+        const word = wordInput.value.trim().toLowerCase();
+        request = {word : word}
+        try {
+            const response = await fetch("/chat/dictionary", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(request)
+            });
+            const data = await response.json()
+            if (!response.ok) {
+                throw data.error
+            }
+            result.querySelector("#abstract h2").textContent = word
+            result.querySelector("pre").textContent = data.reply
+            result.style.display = ""
+            cur_word = word
+            cur_content = data.reply
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async function add_word() {
+        request = {
+            profile: {
+                label: "unfamiliar_word",
+                abstract: cur_word,
+                content: cur_content,
+                familiarity: 0
+            },
+            n_rela: 5
+        }
+        try {
+            const response = await fetch("/chat/remember", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(request)
+            });
+            if (!response.ok) {
+                throw data.error
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    function clear() {
+        result.querySelector("#abstract h2").textContent = ""
+        result.querySelector("pre").textContent = ""
+        result.style.display = "none"
+        cur_word = ""
+        cur_content = ""
+    }
+
+    searchButton.addEventListener("click", search)
+    addButton.addEventListener("click", add_word)
+    deleteButton.addEventListener("click", clear)
 });

@@ -15,6 +15,7 @@ def to_text(content: Dict) -> str | None:
             res += f"[{meaning['pos']}] {meaning['meaning']}\n"
             for example in meaning["examples"]:
                 res += f"> {example}\n"
+            res += "\n"
         return res
     except Exception as e:
         pass    
