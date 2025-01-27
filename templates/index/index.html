@@ -28,12 +28,13 @@
                 <h2></h2>
                 <button id="add">+</button>
             </div>
-            <pre></pre>
+            <pre></div>
         </div>
     </div>
 </div>
 <script>
     const chatHistory = {{ chat_history | tojson }};
 </script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock content %}

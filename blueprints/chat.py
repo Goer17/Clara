@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, render_template, session, request, jsonify
 
 bp = Blueprint('chat', __name__, url_prefix='/chat')
@@ -7,8 +8,13 @@ from agent.generator import Generator
 from agent.planner import Planner
 
 from utils.general import (
-    gpt_4o, tts_hd
+    gpt_4o,
+    ds_chat, ds_reasoner,
+    tts_hd
 )
+from pathlib import Path
+
+import json, re
 
 retriever = Retriever(gpt_4o)
 generator = Generator(gpt_4o)
@@ -30,12 +36,7 @@ def chat():
     )
     try:
         response = planner.chat(session["chat_history"])
-        session["chat_history"].append(
-            {
-                "role": "assistant",
-                "content": response
-            }
-        )
+        
         session.modified = True
         
         return jsonify({"reply": response}), 200

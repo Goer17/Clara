@@ -42,7 +42,7 @@ def learning():
         "ListeningQuestion": n,
         # "SentenceMakingQuestion": n
     }
-    filename, quiz = planner.gen_quiz(n, quiz_profile)
+    filename, quiz = planner.gen_task(n, quiz_profile)
     quiz.shell(retriever=retriever)
 
 if __name__ == "__main__":

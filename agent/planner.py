@@ -1,5 +1,6 @@
 import asyncio, random
-
+import yaml
+from pathlib import Path
 from typing import (
     List, Dict, Tuple
 )
@@ -18,6 +19,16 @@ from utils.questions import (
 )
 from utils.logger import logger
 
+from datetime import datetime
+class Toolbox:
+    def __init__(self):
+        raise RuntimeError("Toolbox is a static class.")
+    
+    @staticmethod
+    def get_current_time():
+        return datetime.now().strftime("%Y-%m-%d %H:%M")
+        
+
 class Planner:
     def __init__(self,
                  engine: LLMEngine,
@@ -27,15 +38,57 @@ class Planner:
         self.engine = engine
         self.retriever = retriever
         self.generator = generator
+        self.tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_current_time",
+                    "description": "get current timestamp with format YY-MM-DD H:M:S",
+                    "parameters": {}
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "generate_task",
+                    "description": "Generate a learning task for the student to practice.",
+                    "parameters": {}
+                }
+            }
+        ]
+        def generate_task():
+            n = 7
+            config = {
+                "GapFillingQuestion": 2 * n,
+                "ListeningQuestion": n,
+                "SentenceMakingQuestion": n
+            }
+            filename, _ = self.gen_task(n, config)
+            name = str(filename).split("/")[-1].removesuffix(".json")
+            link = f"learn/task?name={name}"
+            if filename is not None:
+                return f"A learning task has been created for the student, located at: [link]({link}). You can notify him or her to complete it now."
+            else:
+                return "Something goes wrong."
+        self.functions = {
+            "get_current_time": Toolbox.get_current_time,
+            "generate_task": generate_task
+        }
     
     def chat(self, messages: List[Dict]) -> str:
+        config_path = Path("config") / "prompts" / "planner.yml"
+        toolset = (self.tools, self.functions)
+        with open(config_path) as f:
+            cfg = yaml.safe_load(f)
+            sys_prompt = cfg["chat"]["sys_prompt"]
         try:
-            response = self.engine.chat(messages)
+            response = self.engine.chat(messages, sys_prompt=sys_prompt, toolset=toolset)
             return response
         except Exception as e:
             logger.error(f"Planner.chat() : one error occurred while attempting to chat with planner.", e)
+            return str(e)
     
-    def gen_quiz(self, node_number: int, profile: Dict[str, int]) -> Tuple[str, Quiz]:
+    def gen_task(self, node_number: int, profile: Dict[str, int]) -> Tuple[str, Quiz]:
         try:
             quiz = Quiz()
             nodes = self.retriever.match_node(
@@ -44,6 +97,8 @@ class Planner:
                 limit=node_number
             )
             n = len(nodes)
+            if n == 0:
+                raise RuntimeError("There's no unfamiliar word.")
             for node in nodes:
                 quiz.addn(node)
             async def _addq(q_type, rela_nodes):

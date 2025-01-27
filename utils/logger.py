@@ -1,7 +1,7 @@
+import os
 import logging, traceback
 from pathlib import Path
 from datetime import datetime
-
 
 class Logger:
     # standard logger
@@ -12,8 +12,10 @@ class Logger:
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.WARNING)
         logger.addHandler(console_handler)
-                
+
         log_path = Path('logs')
+        if not os.path.exists(log_path):
+            os.makedirs(log_path)
         file_handler = logging.FileHandler(log_path / f"{datetime.now().strftime('%Y-%m-%d')}.log")
         file_handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

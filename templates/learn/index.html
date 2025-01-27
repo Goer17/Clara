@@ -2,6 +2,20 @@
 
 {% block title %}Clara - Learn{% endblock title %}
 
-{% block content %}
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/learn.css') }}">
+{% endblock style %}
 
+{% block content %}
+<div id="content-body">
+    <div id="task-list">
+        {% for task in task_list %}
+            <a href="task?name={{ task }}" class="task-link" target="_blank">
+                <strong>TASK</strong><br>
+                <em>To Be Completed...</em><br><br>
+                {{ task }}
+            </a>
+        {% endfor %}
+    </div>
+</div>
 {% endblock content %}

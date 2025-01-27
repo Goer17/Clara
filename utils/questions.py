@@ -1,3 +1,4 @@
+import os
 import random
 from pathlib import Path
 import subprocess
@@ -20,6 +21,7 @@ from utils.general import (
 )
 from utils.string import Formatter
 from .logger import logger
+from shortuuid import uuid
 
 prompts = Path("config") / "prompts" / "feedback.yml"
 with open(prompts) as f:
@@ -316,7 +318,9 @@ class Quiz:
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
         if not isinstance(path, Path):
             path = Path(path)
-        filepath = path / f"[{timestamp}].json"
+        if not os.path.exists(path):
+            os.makedirs(path)
+        filepath = path / f"[{timestamp} {uuid()[:4]}].json"
         with open(filepath, 'w') as f:
             quiz_dat_str = json.dumps(quiz_dat)
             f.write(quiz_dat_str)

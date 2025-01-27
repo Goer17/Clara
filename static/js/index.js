@@ -1,4 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
+
+    // markdown
+    // md_container = document.getElementsByClassName("markdown")
+    // md_container.innerHTML = marked(md_container.innerText)
+
     const messagesDiv = document.getElementById("messages");
     const input = document.getElementById("input");
     const sendButton = document.getElementById("send");
@@ -6,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderChatHistory(history) {
         history.forEach(({ role, content }) => {
-            if (role === "user" || role == "assistant") {
+            if ((role === "user" || role == "assistant") && content.trim() !== "") {
                 appendMessage(role, content);
             }
         });
@@ -14,12 +19,14 @@ document.addEventListener("DOMContentLoaded", () => {
     renderChatHistory(chatHistory);
 
     function appendMessage(role, text) {
+        text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
         const messageDiv = document.createElement("div");
         messageDiv.classList.add("message", role);
     
-        const pre = document.createElement("pre");
-        pre.textContent = text;
-        messageDiv.appendChild(pre);
+        const div = document.createElement("div");
+        div.classList.add("ctx")
+        div.innerHTML = text;
+        messageDiv.appendChild(div);
     
         messagesDiv.appendChild(messageDiv);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -40,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 body: JSON.stringify({ message }),
             });
-
+            
             const data = await response.json();
             if (data.reply) {
                 appendMessage("assistant", data.reply);
@@ -90,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const word = wordInput.value.trim().toLowerCase();
         request = {word : word}
         try {
+            appendMessage("assistant", `Searching "${word}" in dictionary...`)
             const response = await fetch("/chat/dictionary", {
                 method: "POST",
                 headers: {
@@ -106,8 +114,9 @@ document.addEventListener("DOMContentLoaded", () => {
             result.style.display = ""
             cur_word = word
             cur_content = data.reply
+            appendMessage("assistant", `✅ Completed!\n${word}\n${data.reply}`)
         } catch (error) {
-            console.log(error)
+            appendMessage("assistant", error)
         }
     }
 
@@ -122,6 +131,8 @@ document.addEventListener("DOMContentLoaded", () => {
             n_rela: 5
         }
         try {
+            const w = cur_word
+            appendMessage("assistant", `Adding "${cur_word}" to the vocabulary notebook...`)
             const response = await fetch("/chat/remember", {
                 method: "POST",
                 headers: {
@@ -132,6 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) {
                 throw data.error
             }
+            appendMessage("assistant", `✅ "${w}" was added to the vocabulary notebook.`)
         } catch (error) {
             console.log(error)
         }
@@ -148,4 +160,11 @@ document.addEventListener("DOMContentLoaded", () => {
     searchButton.addEventListener("click", search)
     addButton.addEventListener("click", add_word)
     deleteButton.addEventListener("click", clear)
+
+    wordInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            search();
+        }
+    });
 });

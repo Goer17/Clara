@@ -1,7 +1,10 @@
 body {
-    margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
+    background-color: #f5f9f6;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    overflow: hidden; /* 防止滚动条出现 */
 }
 
 .header {
@@ -35,7 +38,13 @@ body {
 
 .navigator a:hover {
     background-color: #f0f0f0; /* 悬停时背景变灰 */
-    color: #007bff; /* 文字变蓝色 */
+    color: #007bff;
+}
+
+.navigator a.active {
+    background-color: #f0f0f0; /* 悬停时背景变灰 */
+    color: #333;
+    font-weight: bold; /* 加粗 */
 }
 
 .content {

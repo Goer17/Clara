@@ -1,12 +1,3 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f9f6;
-    margin: 0;
-    padding: 0;
-    color: #333;
-    overflow: hidden; /* 防止滚动条出现 */
-}
-
 #content-body {
     position: relative; /* 确保内部绝对定位元素以此为基准 */
     width: 100%;
@@ -23,7 +14,7 @@ body {
     height: 80%; /* 高度固定为容器的 80% */
     background-color: #ffffff;
     border: 2px solid #3bb273;
-    border-radius: 12px 12px 12px 12px; /* 右侧圆角，左侧贴合 */
+    border-radius: 12px 12px 12px 12px;
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
@@ -72,11 +63,12 @@ body {
     align-self: flex-start;
 }
 
-.message pre {
+.message .ctx {
     width: 100%;
     white-space: pre-wrap;
-    word-wrap: break-word; /* 支持旧版浏览器 */
-    overflow-wrap: break-word; /* 标准属性，现代浏览器支持 */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-family: monospace;
 }
 
 textarea#input {
@@ -210,13 +202,14 @@ button#add:hover {
 
 #dictionary #result pre {
     width: 100%;
+    height: 70%;
     border-top: 1px solid #bcfcda;
     padding-top: 10%;
     white-space: pre-wrap;
     word-wrap: break-word;
     overflow-wrap: break-word;
     font-size: 14px;
-    overflow-y: auto;
+    overflow-y: scroll;
 }
 
 button#delete {

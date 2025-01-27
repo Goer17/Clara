@@ -1,11 +1,12 @@
 import os
+import json
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 from openai import (
     Client, AsyncClient
 )
 from typing_extensions import (
-    List, Dict
+    List, Dict, Tuple
 )
 from .logger import logger
 
@@ -79,16 +80,66 @@ class LLMEngine:
         logger.info(f"LLMEngine.generate() [{self.model}] : {response}")
         return response
     
-    def chat(self, messages: List[Dict], sys_prompt: str | Prompt | None = "", *args, **kwargs) -> str:
+    def chat(self, messages: List[Dict], sys_prompt: str | Prompt | None = "", toolset: Tuple[List, Dict] = ([], {}), *args, **kwargs) -> str:
         sys_prompt = sys_prompt.value() if isinstance(sys_prompt, Prompt) else sys_prompt
-        messages = [{"role": "system", "content": sys_prompt}] + messages
+        tools, functions = toolset
+        prefix = [{"role": "system", "content": sys_prompt}]
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=messages,
+            messages=prefix + messages,
+            tools=tools,
             *args, **kwargs
-        ).choices[0].message.content
-        logger.info(f"LLMEngine.chat() [{self.model}] : {response}")
-        return response
+        ).choices[0].message
+        while response.tool_calls:
+            tool_calls = [
+                {
+                    "id": tool_call.id,
+                    "type": "function",
+                    "function": {
+                        "arguments": tool_call.function.arguments,
+                        "name": tool_call.function.name
+                    }
+                } for tool_call in response.tool_calls
+            ]
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": "",
+                    "tool_calls": tool_calls
+                }
+            )
+            for tool_call in response.tool_calls:
+                call_id = tool_call.id
+                func = tool_call.function
+                try:
+                    logger.info(f"LLMEngine.chat() [{self.model}] : function call : {func.name}, parameters : {func.arguments}")
+                    result = functions[func.name](**json.loads(func.arguments))
+                    logger.info(f"Result : {result}")
+                except Exception as e:
+                    result = str(e)
+                    logger.error(f"LLMEngine.chat() [{self.model}] : one error occurred while attempting to call function {func}", e)
+                messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": call_id,
+                        "content": str(result)
+                    }
+                )
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=prefix + messages,
+                tools=tools,
+                *args, **kwargs
+            ).choices[0].message
+        messages.append(
+            {
+                "role": "assistant",
+                "content": response.content
+            }
+        )
+        
+        logger.info(f"LLMEngine.chat() [{self.model}] : {response.content}")
+        return response.content
     
     async def async_generate(self, prompt: str | Prompt | None = None, sys_prompt: str | Prompt | None = None, few_shots: List[Dict] = [],
                              *args, **kwargs) -> str:
@@ -153,10 +204,25 @@ load_dotenv(find_dotenv())
 openai_api_key = os.environ["OPENAI_API_KEY"]
 base_url = os.environ["BASE_URL"]
 
+deepseek_api_kay = os.environ["DEEPSEEK_API_KEY"]
+deepseek_base_url = os.environ["DEEPSEEK_BASE_URL"]
+
 gpt_4o = LLMEngine(
     model="gpt-4o",
     api_key=openai_api_key,
     base_url=base_url
+)
+
+ds_chat = LLMEngine(
+    model="deepseek-chat",
+    api_key=deepseek_api_kay,
+    base_url=deepseek_base_url
+)
+
+ds_reasoner = LLMEngine(
+    model="deepseek-reasoner",
+    api_key=deepseek_api_kay,
+    base_url=deepseek_base_url
 )
 
 tts = AMEngine(

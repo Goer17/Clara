@@ -10,8 +10,10 @@
 <body>
     <div class="header"></div>
     <div class="navigator">
-        <a class="home" href="/"><span style="font-size: 1.5em;">🏠</span>&nbsp;&nbsp;&nbsp;&nbsp; Home</a>
-        <a class="learn" href="/learn"><span style="font-size: 1.5em;">📑</span>&nbsp;&nbsp;&nbsp;&nbsp; Learning</a>
+        <a class="home {% if request.endpoint == 'index.index' %}active{% endif %}" href="/"><span style="font-size: 1.5em;">🏠</span>&nbsp;&nbsp;&nbsp;&nbsp; Home</a>
+        <a class="learn {% if request.endpoint == 'learn.index' %}active{% endif %}" href="/learn"><span style="font-size: 1.5em;">🧑🏻‍💻</span>&nbsp;&nbsp;&nbsp;&nbsp; Learning</a>
+        <a class="notebook {% if request.endpoint == 'notebook.index' %}active{% endif %}" href="/notebook"><span style="font-size: 1.5em;">📙</span>&nbsp;&nbsp;&nbsp;&nbsp; Notebook</a>
+        <a class="setting {% if request.endpoint == 'setting.index' %}active{% endif %}" href="/setting"><span style="font-size: 1.5em;">⚙️</span>&nbsp;&nbsp;&nbsp;&nbsp; Setting</a>
     </div>
     <div class="content">
         {% block content %}{% endblock content %}
