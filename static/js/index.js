@@ -1,9 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    // markdown
-    // md_container = document.getElementsByClassName("markdown")
-    // md_container.innerHTML = marked(md_container.innerText)
-
     const messagesDiv = document.getElementById("messages");
     const input = document.getElementById("input");
     const sendButton = document.getElementById("send");

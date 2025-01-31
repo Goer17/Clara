@@ -3,9 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/task.css') }}">
     <title>task</title>
 </head>
 <body>
-    <h1>{{ name }}</h1>
+    <div id="task-body">
+        <div id="header">
+            {{ name }}
+        </div>
+        <div id="content">
+            <div id="display">
+                <div id="question">This is a short English learning task created by your AI tutor, 🤖 <em>Clara</em>.<br>If you're ready to finish it, click the button below.</div>
+                <br><br><br><br>
+                <div id="analysis">Once you start this task, you cannot leave the page midway; otherwise, your progress will not be saved.</div>
+            </div>
+            <input type="text" id="answer" placeholder="Type your answer here...">
+        </div>
+        <div id="footer">
+            <button id="finish">I am ready</button>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/task.js') }}"></script>
 </body>
 </html>

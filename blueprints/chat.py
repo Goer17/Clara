@@ -36,7 +36,6 @@ def chat():
     )
     try:
         response = planner.chat(session["chat_history"])
-        
         session.modified = True
         
         return jsonify({"reply": response}), 200
@@ -86,3 +85,64 @@ def remember():
         return jsonify({"reply": f"One node was Remembered : {node}"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+from utils.questions import Quiz
+
+# Quiz
+cur_quiz: Quiz = None
+
+@bp.route("/quiz/start", methods=["POST"])
+def start():
+    global cur_quiz
+    if cur_quiz is not None:
+        return jsonify({"error": "There is one ongoing quiz yet to be completed."}), 500
+    data = request.json
+    name = data.get("name")
+    filepath = Path("material") / "quiz" / f"{name}.json"
+    cur_quiz = Quiz.load(filepath, retriever)
+    cur_quiz.init_cards()
+    if isinstance(cur_quiz, Quiz):
+        return jsonify({"reply": "Successfully started the quiz!"}), 200
+    return jsonify({"error": "Failed starting the quiz."}), 500
+
+@bp.route("/quiz/card", methods=["GET"])
+def card():
+    global cur_quiz
+    if cur_quiz is None:
+        return jsonify({"error": "Quiz has not been started."}), 400
+    data = request.json
+    try:
+        idx = data.get("idx")
+        cd = cur_quiz.card(idx)
+        return jsonify(cd), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.route("/quiz/mark", methods=["GET", "POST"])
+def mark():
+    global cur_quiz
+    if cur_quiz is None:
+        return jsonify({"error": "Quiz has not been started."}), 400
+    data = request.json
+    try:
+        q_type = data["q_type"]
+        idx = data["idx"]
+
+        answer = data.get("answer", "")
+        question = cur_quiz.problemset[q_type][idx]
+        score, analysis, _ = question.mark(answer, gpt_4o)
+        reply = {
+            "score": score,
+            "solution": question.solution,
+            "analysis": analysis
+        }
+        return jsonify(reply), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.route("/quiz/end")
+def end():
+    global cur_quiz
+    cur_quiz = None
+    
+    return jsonify({"reply": "The current quiz was completed!"})

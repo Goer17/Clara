@@ -209,6 +209,72 @@ class Quiz:
     def __init__(self):
         self.knowledges: List[MemoryNode] = []
         self.problemset: Dict[str, List[Question]] = defaultdict(list)
+        self.description: str = "The is a vocabulary learning task with several questions."
+    
+    @staticmethod
+    def intro(q_type: str):
+        if q_type == "GapFillingQuestion":
+            return "Gap Filling: Fill in each blank with a word you have just learned."
+        if q_type == "ListeningQuestion":
+            return "Listening: Listen to the radio and answer the questions."
+        if q_type == "SentenceMakingQuestion":
+            return "Sentence Making: Use the word you have just learned to create sentences based on each given scenario."
+        
+        return "Unknown"
+    
+    def init_cards(self):
+        self.cards = [
+            {
+                "type": "intro",
+                "props": {
+                    "content": self.description
+                }
+            }
+        ]
+        for knowledge in self.knowledges:
+            self.cards.append(
+                {
+                    "type": "learn",
+                    "props": {
+                        "abstract": knowledge.get_prop("abstract"),
+                        "content": knowledge.get_prop("content")
+                    }
+                }
+            )
+        part = 0
+        for q_type, problems in sorted(self.problemset.items()):
+            part += 1
+            self.cards.append(
+                {
+                    "type": "itro",
+                    "props": {
+                        "part": part,
+                        "content": Quiz.intro(q_type)
+                    }
+                }
+            )
+            for idx, problem in enumerate(problems):
+                self.cards.append(
+                    {
+                        "type": "question",
+                        "props": {
+                            "type": q_type,
+                            "idx": idx,
+                            "question": problem.question(),
+                            "hint_question": problem.question(hint=True),
+                            "solution": problem.solution
+                        }
+                    }
+                )
+    
+    def card(self, idx: int) -> Dict[str, str]:
+        if idx < len(self.cards):
+            return self.cards[idx]
+        else:
+            return {
+                "type": "end",
+                "props": {}
+            }
     
     def addn(self, node: MemoryNode):
         self.knowledges.append(node)
@@ -329,8 +395,12 @@ class Quiz:
     
     @staticmethod
     def load(filepath: str | Path, retriever: Retriever) -> 'Quiz':
-        with open(filepath) as f:
-            quiz_dat: Dict = json.load(f)
+        try:
+            with open(filepath) as f:
+                quiz_dat: Dict = json.load(f)
+        except Exception as e:
+            logger.error(f"Quiz.load() : an error ocurred while attempting to load a knowledge from quiz {filepath}", e)
+            return None
         quiz = Quiz()
         knowledges = quiz_dat.pop("Knowledges", [])
         for m_id in knowledges:

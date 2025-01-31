@@ -1,1 +1,242 @@
-{"Knowledges": ["6jrGZ9WBgJihVMPMDE76hT", "FGVwWqkMn2MLoPdC6waoGd", "RcQuCZrSKbuQanDz7MGW47", "MANcDecu3XE2DBpUhRG7vy", "HGjdbUKYFonT2q2nKiuLLK", "6TYFZeBTTZbJdAYULwqKot", "ZJoDLQiTZVgaghjywMdpkC"], "ListeningQuestion": [{"content": "", "solution": "In the summer, the lake near our house is often covered with green algae.", "rela_nodes": ["6jrGZ9WBgJihVMPMDE76hT"]}, {"content": "", "solution": "Trying to fix the broken radio without the right tools was completely futile.", "rela_nodes": ["ZJoDLQiTZVgaghjywMdpkC"]}, {"content": "", "solution": "Our team needs to liaise with suppliers to meet the project deadline.", "rela_nodes": ["RcQuCZrSKbuQanDz7MGW47"]}, {"content": "", "solution": "Frankly, I find the movie quite boring despite the hype.", "rela_nodes": ["FGVwWqkMn2MLoPdC6waoGd"]}, {"content": "", "solution": "The teacher noticed a discrepancy in the student's grades and asked for clarification.", "rela_nodes": ["HGjdbUKYFonT2q2nKiuLLK"]}, {"content": "", "solution": "There will be a gathering at the park to celebrate the holiday with friends and family.", "rela_nodes": ["MANcDecu3XE2DBpUhRG7vy"]}, {"content": "", "solution": "Gardeners use aeration to ensure that plants get enough oxygen and nutrients in the soil.", "rela_nodes": ["6TYFZeBTTZbJdAYULwqKot"]}], "GapFillingQuestion": [{"content": "Scientists study the growth of $BLANK in oceans to understand their effect on marine ecosystems.", "solution": "algae", "rela_nodes": ["6jrGZ9WBgJihVMPMDE76hT"]}, {"content": "To keep the pond water fresh, regular $BLANK is necessary.", "solution": "aeration", "rela_nodes": ["6TYFZeBTTZbJdAYULwqKot"]}, {"content": "He admitted, $BLANK speaking, that he hadn't been entirely truthful.", "solution": "frankly", "rela_nodes": ["FGVwWqkMn2MLoPdC6waoGd"]}, {"content": "Fans from all over the country attended the $BLANK of vintage car enthusiasts.", "solution": "gathering", "rela_nodes": ["MANcDecu3XE2DBpUhRG7vy"]}, {"content": "He stated, $BLANK, that the project needed more work before submission.", "solution": "frankly", "rela_nodes": ["FGVwWqkMn2MLoPdC6waoGd"]}, {"content": "The scientists noted a $BLANK between the temperature readings from different sensors.", "solution": "discrepancy", "rela_nodes": ["HGjdbUKYFonT2q2nKiuLLK"]}, {"content": "There was a noticeable $BLANK in the test results from different labs.", "solution": "discrepancy", "rela_nodes": ["HGjdbUKYFonT2q2nKiuLLK"]}, {"content": "The book club's monthly $BLANK always sparked interesting debates.", "solution": "gathering", "rela_nodes": ["MANcDecu3XE2DBpUhRG7vy"]}, {"content": "Trying to find the lost keys in the pitch-black room proved $BLANK.", "solution": "futile", "rela_nodes": ["ZJoDLQiTZVgaghjywMdpkC"]}, {"content": "Regular $BLANK of the pond water is vital to keep fish healthy by maintaining adequate oxygen levels.", "solution": "aeration", "rela_nodes": ["6TYFZeBTTZbJdAYULwqKot"]}, {"content": "The aquarium needed regular cleaning because $BLANK was growing rapidly on the glass walls.", "solution": "algae", "rela_nodes": ["6jrGZ9WBgJihVMPMDE76hT"]}, {"content": "Trying to fix the broken vase with tape turned out to be $BLANK.", "solution": "futile", "rela_nodes": ["ZJoDLQiTZVgaghjywMdpkC"]}, {"content": "As part of her role, she must $BLANK with the suppliers every week to ensure a steady flow of materials.", "solution": "liaise", "rela_nodes": ["RcQuCZrSKbuQanDz7MGW47"]}, {"content": "The team decided to $BLANK with the partner organization to ensure a smooth transition of the project.", "solution": "liaise", "rela_nodes": ["RcQuCZrSKbuQanDz7MGW47"]}], "SentenceMakingQuestion": [{"content": "You're walking by a pond in summer and notice something green floating on the water's surface. Describe what you see and what it might indicate about the environment.", "solution": "The pond was covered with green algae, which might indicate nutrient-rich water assisting in its rapid growth.", "rela_nodes": ["6jrGZ9WBgJihVMPMDE76hT"], "analysis": ["algae", "green algae"]}, {"content": "You are reviewing two financial reports from the same company, but you notice that the numbers for total annual revenue are different in each report. How would you describe this situation?", "solution": "There is a discrepancy between the two financial reports regarding the total annual revenue.", "rela_nodes": ["HGjdbUKYFonT2q2nKiuLLK"], "analysis": ["discrepancy", "between"]}, {"content": "Think about a time when you had to give your honest opinion about a friend's decision to accept a job offer. How would you express your thoughts directly?", "solution": "Frankly, I think accepting that job might not be the best move for your career right now.", "rela_nodes": ["FGVwWqkMn2MLoPdC6waoGd"], "analysis": ["frankly", "expressing an opinion openly"]}, {"content": "Think about a time when you've tried to fix a broken appliance, like a coffee maker, but despite all your efforts, it still didn't work. How would you describe this experience?", "solution": "After hours of trying different methods to repair the coffee maker, it was clear that my attempts were futile.", "rela_nodes": ["ZJoDLQiTZVgaghjywMdpkC"], "analysis": ["futile", "were futile"]}, {"content": "You have taken up gardening as a hobby and noticed that the plants in your garden are not growing well due to waterlogged soil. Describe what you might do to help the plants thrive.", "solution": "I would start with the aeration of the soil to improve drainage and ensure the roots receive sufficient oxygen, enabling the plants to grow better.", "rela_nodes": ["6TYFZeBTTZbJdAYULwqKot"], "analysis": ["aeration", "aeration of the soil"]}, {"content": "You are part of a school event planning committee, and you need to coordinate with the suppliers to ensure everything is ready for the event day. Describe how you would ensure effective communication.", "solution": "I will liaise with the suppliers regularly to confirm that all materials are delivered on time and to address any issues that may arise.", "rela_nodes": ["RcQuCZrSKbuQanDz7MGW47"], "analysis": ["liaise", "will liaise"]}, {"content": "Your family is planning a get-together to celebrate a special occasion. Describe this event using the word 'gathering.'", "solution": "The family gathering was filled with laughter, stories, and delicious food as everyone came together to celebrate the anniversary.", "rela_nodes": ["MANcDecu3XE2DBpUhRG7vy"], "analysis": ["gathering", "noun", "social meeting"]}]}
+{
+    "Knowledges": [
+        "6jrGZ9WBgJihVMPMDE76hT",
+        "FGVwWqkMn2MLoPdC6waoGd",
+        "RcQuCZrSKbuQanDz7MGW47",
+        "MANcDecu3XE2DBpUhRG7vy",
+        "HGjdbUKYFonT2q2nKiuLLK",
+        "6TYFZeBTTZbJdAYULwqKot",
+        "ZJoDLQiTZVgaghjywMdpkC"
+    ],
+    "ListeningQuestion": [
+        {
+            "content": "",
+            "solution": "In the summer, the lake near our house is often covered with green algae.",
+            "rela_nodes": [
+                "6jrGZ9WBgJihVMPMDE76hT"
+            ]
+        },
+        {
+            "content": "",
+            "solution": "Trying to fix the broken radio without the right tools was completely futile.",
+            "rela_nodes": [
+                "ZJoDLQiTZVgaghjywMdpkC"
+            ]
+        },
+        {
+            "content": "",
+            "solution": "Our team needs to liaise with suppliers to meet the project deadline.",
+            "rela_nodes": [
+                "RcQuCZrSKbuQanDz7MGW47"
+            ]
+        },
+        {
+            "content": "",
+            "solution": "Frankly, I find the movie quite boring despite the hype.",
+            "rela_nodes": [
+                "FGVwWqkMn2MLoPdC6waoGd"
+            ]
+        },
+        {
+            "content": "",
+            "solution": "The teacher noticed a discrepancy in the student's grades and asked for clarification.",
+            "rela_nodes": [
+                "HGjdbUKYFonT2q2nKiuLLK"
+            ]
+        },
+        {
+            "content": "",
+            "solution": "There will be a gathering at the park to celebrate the holiday with friends and family.",
+            "rela_nodes": [
+                "MANcDecu3XE2DBpUhRG7vy"
+            ]
+        },
+        {
+            "content": "",
+            "solution": "Gardeners use aeration to ensure that plants get enough oxygen and nutrients in the soil.",
+            "rela_nodes": [
+                "6TYFZeBTTZbJdAYULwqKot"
+            ]
+        }
+    ],
+    "GapFillingQuestion": [
+        {
+            "content": "Scientists study the growth of $BLANK in oceans to understand their effect on marine ecosystems.",
+            "solution": "algae",
+            "rela_nodes": [
+                "6jrGZ9WBgJihVMPMDE76hT"
+            ]
+        },
+        {
+            "content": "To keep the pond water fresh, regular $BLANK is necessary.",
+            "solution": "aeration",
+            "rela_nodes": [
+                "6TYFZeBTTZbJdAYULwqKot"
+            ]
+        },
+        {
+            "content": "He admitted, $BLANK speaking, that he hadn't been entirely truthful.",
+            "solution": "frankly",
+            "rela_nodes": [
+                "FGVwWqkMn2MLoPdC6waoGd"
+            ]
+        },
+        {
+            "content": "Fans from all over the country attended the $BLANK of vintage car enthusiasts.",
+            "solution": "gathering",
+            "rela_nodes": [
+                "MANcDecu3XE2DBpUhRG7vy"
+            ]
+        },
+        {
+            "content": "He stated, $BLANK, that the project needed more work before submission.",
+            "solution": "frankly",
+            "rela_nodes": [
+                "FGVwWqkMn2MLoPdC6waoGd"
+            ]
+        },
+        {
+            "content": "The scientists noted a $BLANK between the temperature readings from different sensors.",
+            "solution": "discrepancy",
+            "rela_nodes": [
+                "HGjdbUKYFonT2q2nKiuLLK"
+            ]
+        },
+        {
+            "content": "There was a noticeable $BLANK in the test results from different labs.",
+            "solution": "discrepancy",
+            "rela_nodes": [
+                "HGjdbUKYFonT2q2nKiuLLK"
+            ]
+        },
+        {
+            "content": "The book club's monthly $BLANK always sparked interesting debates.",
+            "solution": "gathering",
+            "rela_nodes": [
+                "MANcDecu3XE2DBpUhRG7vy"
+            ]
+        },
+        {
+            "content": "Trying to find the lost keys in the pitch-black room proved $BLANK.",
+            "solution": "futile",
+            "rela_nodes": [
+                "ZJoDLQiTZVgaghjywMdpkC"
+            ]
+        },
+        {
+            "content": "Regular $BLANK of the pond water is vital to keep fish healthy by maintaining adequate oxygen levels.",
+            "solution": "aeration",
+            "rela_nodes": [
+                "6TYFZeBTTZbJdAYULwqKot"
+            ]
+        },
+        {
+            "content": "The aquarium needed regular cleaning because $BLANK was growing rapidly on the glass walls.",
+            "solution": "algae",
+            "rela_nodes": [
+                "6jrGZ9WBgJihVMPMDE76hT"
+            ]
+        },
+        {
+            "content": "Trying to fix the broken vase with tape turned out to be $BLANK.",
+            "solution": "futile",
+            "rela_nodes": [
+                "ZJoDLQiTZVgaghjywMdpkC"
+            ]
+        },
+        {
+            "content": "As part of her role, she must $BLANK with the suppliers every week to ensure a steady flow of materials.",
+            "solution": "liaise",
+            "rela_nodes": [
+                "RcQuCZrSKbuQanDz7MGW47"
+            ]
+        },
+        {
+            "content": "The team decided to $BLANK with the partner organization to ensure a smooth transition of the project.",
+            "solution": "liaise",
+            "rela_nodes": [
+                "RcQuCZrSKbuQanDz7MGW47"
+            ]
+        }
+    ],
+    "SentenceMakingQuestion": [
+        {
+            "content": "You're walking by a pond in summer and notice something green floating on the water's surface. Describe what you see and what it might indicate about the environment.",
+            "solution": "The pond was covered with green algae, which might indicate nutrient-rich water assisting in its rapid growth.",
+            "rela_nodes": [
+                "6jrGZ9WBgJihVMPMDE76hT"
+            ],
+            "analysis": [
+                "algae",
+                "green algae"
+            ]
+        },
+        {
+            "content": "You are reviewing two financial reports from the same company, but you notice that the numbers for total annual revenue are different in each report. How would you describe this situation?",
+            "solution": "There is a discrepancy between the two financial reports regarding the total annual revenue.",
+            "rela_nodes": [
+                "HGjdbUKYFonT2q2nKiuLLK"
+            ],
+            "analysis": [
+                "discrepancy",
+                "between"
+            ]
+        },
+        {
+            "content": "Think about a time when you had to give your honest opinion about a friend's decision to accept a job offer. How would you express your thoughts directly?",
+            "solution": "Frankly, I think accepting that job might not be the best move for your career right now.",
+            "rela_nodes": [
+                "FGVwWqkMn2MLoPdC6waoGd"
+            ],
+            "analysis": [
+                "frankly",
+                "expressing an opinion openly"
+            ]
+        },
+        {
+            "content": "Think about a time when you've tried to fix a broken appliance, like a coffee maker, but despite all your efforts, it still didn't work. How would you describe this experience?",
+            "solution": "After hours of trying different methods to repair the coffee maker, it was clear that my attempts were futile.",
+            "rela_nodes": [
+                "ZJoDLQiTZVgaghjywMdpkC"
+            ],
+            "analysis": [
+                "futile",
+                "were futile"
+            ]
+        },
+        {
+            "content": "You have taken up gardening as a hobby and noticed that the plants in your garden are not growing well due to waterlogged soil. Describe what you might do to help the plants thrive.",
+            "solution": "I would start with the aeration of the soil to improve drainage and ensure the roots receive sufficient oxygen, enabling the plants to grow better.",
+            "rela_nodes": [
+                "6TYFZeBTTZbJdAYULwqKot"
+            ],
+            "analysis": [
+                "aeration",
+                "aeration of the soil"
+            ]
+        },
+        {
+            "content": "You are part of a school event planning committee, and you need to coordinate with the suppliers to ensure everything is ready for the event day. Describe how you would ensure effective communication.",
+            "solution": "I will liaise with the suppliers regularly to confirm that all materials are delivered on time and to address any issues that may arise.",
+            "rela_nodes": [
+                "RcQuCZrSKbuQanDz7MGW47"
+            ],
+            "analysis": [
+                "liaise",
+                "will liaise"
+            ]
+        },
+        {
+            "content": "Your family is planning a get-together to celebrate a special occasion. Describe this event using the word 'gathering.'",
+            "solution": "The family gathering was filled with laughter, stories, and delicious food as everyone came together to celebrate the anniversary.",
+            "rela_nodes": [
+                "MANcDecu3XE2DBpUhRG7vy"
+            ],
+            "analysis": [
+                "gathering",
+                "noun",
+                "social meeting"
+            ]
+        }
+    ]
+}
