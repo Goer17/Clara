@@ -91,7 +91,7 @@ from utils.questions import Quiz
 # Quiz
 cur_quiz: Quiz = None
 
-@bp.route("/quiz/start", methods=["POST"])
+@bp.route("/quiz/start", methods=["GET", "POST"])
 def start():
     global cur_quiz
     if cur_quiz is not None:
@@ -105,7 +105,7 @@ def start():
         return jsonify({"reply": "Successfully started the quiz!"}), 200
     return jsonify({"error": "Failed starting the quiz."}), 500
 
-@bp.route("/quiz/card", methods=["GET"])
+@bp.route("/quiz/card", methods=["GET", "POST"])
 def card():
     global cur_quiz
     if cur_quiz is None:

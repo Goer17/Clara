@@ -51,6 +51,7 @@ body {
 }
 
 #answer {
+    display: none;
     width: 80%;
     height: 10%;
     font-size: 18px;

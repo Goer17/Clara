@@ -246,7 +246,7 @@ class Quiz:
             part += 1
             self.cards.append(
                 {
-                    "type": "itro",
+                    "type": "intro",
                     "props": {
                         "part": part,
                         "content": Quiz.intro(q_type)

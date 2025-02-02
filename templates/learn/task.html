@@ -23,6 +23,9 @@
             <button id="finish">I am ready</button>
         </div>
     </div>
+    <script>
+        const taskName = {{ name | tojson }};
+    </script>
     <script src="{{ url_for('static', filename='js/task.js') }}"></script>
 </body>
 </html>
