@@ -39,6 +39,8 @@ class Question(ABC):
         self.solution = solution
         self.rela_nodes = rela_nodes
         self.analysis = analysis
+        self.answer = None
+        self.score = 0
     
     @abstractmethod
     def question(self, hint: bool = False) -> str:
@@ -58,7 +60,7 @@ class Question(ABC):
             str: analysis
             List[Dict[str, str]]: mistakes the student had, can be empty
         """
-        pass
+        self.answer = answer
 
 
 class GapFillingQuestion(Question):
@@ -74,6 +76,8 @@ class GapFillingQuestion(Question):
         return q
     
     def mark(self, answer: str, engine = None):
+        super().mark(answer, engine)
+        self.score = int(answer.lower() == self.solution.lower())
         return int(answer.lower() == self.solution.lower()), "", []
 
 
@@ -104,10 +108,11 @@ class SentenceMakingQuestion(Question):
             return [], ""
     
     def mark(self, answer, engine):
+        super().mark(answer, engine)
         if len(answer) == 0:
             return 0, self.analysis, []
         mistakes, polished = self.__feedback(answer, engine)
-        score = max(0, 1 - len(mistakes) / 4)
+        self.score = max(0, 1 - len(mistakes) / 4)
         feedbacks = [
             {
                 "abstract": ", ".join(mistakes),
@@ -115,7 +120,7 @@ class SentenceMakingQuestion(Question):
             }
         ]
         
-        return score, self.analysis, feedbacks
+        return self.score, self.analysis, feedbacks
         
 
 class ListeningQuestion(Question):
@@ -196,13 +201,10 @@ class ListeningQuestion(Question):
             return []
     
     def mark(self, answer, engine) -> Tuple[int, str, List[Dict[str, str]]]:
-        score = 1 - self.__editing_dist(answer) / max(len(self.solution), len(answer))
-        if score < 1 and len(answer):
-            feedbacks = self.__feedback(answer, engine)
-        else:
-            feedbacks = []
+        super().mark(answer, engine)
+        self.score = 1 - self.__editing_dist(answer) / max(len(self.solution), len(answer))
 
-        return score, self.analysis, feedbacks
+        return self.score, self.analysis, []
 
 
 class Quiz:

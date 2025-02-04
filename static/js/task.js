@@ -3,6 +3,7 @@ window.addEventListener('beforeunload', (event) => {
     event.returnValue = '';
 });
 
+// TODO - Bug: button disable
 document.addEventListener("DOMContentLoaded", () => {
     const question = document.getElementById("question");
     const analysis = document.getElementById("analysis");
@@ -20,6 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
     var cur_state = STATE.START;
     var marked = false;
     var cur_data = {}
+
+    const loading_icon = document.createElement("img");
+    loading_icon.src = "/static/imgs/circle-loading-2.gif";
+    loading_icon.id = "loading"
 
     async function render_task() {
         try {
@@ -50,9 +55,28 @@ document.addEventListener("DOMContentLoaded", () => {
             else if (data.type === "question") {
                 question.innerText = data.props.question;
                 if (!marked) {
-                    analysis.innerText = ""
+                    analysis.innerText = "";
                 }
                 answerInput.style.display = "block";
+                if (data.props.type === "ListeningQuestion") {
+                    content = data.props.solution;
+                    finishButton.disable = true;
+                    finishButton.textContent = "";
+                    finishButton.appendChild(loading_icon);
+                    try {
+                        await fetch("/chat/quiz/play", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({content: content, t: 2})
+                        });
+                    } catch (error) {
+                        console.log(error)
+                    }
+                    finishButton.disable = false;
+                    finishButton.removeChild(loading_icon);
+                }
             }
 
             if (cur_state == STATE.START) {
@@ -91,6 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
             idx += 1;
             cur_state = STATE.CONFIRM;
             marked = false;
+            answerInput.value = "";
         }
         else if (cur_state === STATE.CONFIRM) {
             answer = answerInput.value.trim();
@@ -101,6 +126,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     idx: cur_data.props.idx,
                     answer: answer
                 }
+                finishButton.disable = true;
+                finishButton.textContent = "";
+                finishButton.appendChild(loading_icon);
                 const response = await fetch("/chat/quiz/mark", {
                     method: "POST",
                     headers: {
@@ -112,11 +140,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!response.ok) {
                     throw data.error;
                 }
-                console.log(data);
                 analysis.innerText = `Right answer: ${data.solution}\n` +
                     `Your answer: ${answer}\n` +
                     `Score: ${data.score}\n` +
                     `${data.analysis}`;
+                finishButton.disable = false;
                 marked = true;
             } catch (error) {
                 console.log(error);

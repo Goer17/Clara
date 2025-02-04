@@ -1,4 +1,4 @@
-import os
+import os, random, time
 from flask import Blueprint, render_template, session, request, jsonify
 
 bp = Blueprint('chat', __name__, url_prefix='/chat')
@@ -140,9 +140,35 @@ def mark():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@bp.route("/quiz/play", methods=["GET", "POST"])
+def play():
+    data = request.json
+    content, t = data.get("content"), data.get("t")
+    voice = random.choice(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'])
+    name = tts_hd.generate(content, voice)
+    for _ in range(t):
+        time.sleep(2)
+        tts_hd.play(name)
+    
+    return jsonify({"reply": "ok"}), 200
+
+@bp.route("quiz/quit", methods=["GET", "POST"])
+def quit():
+    global cur_quiz
+    cur_quiz = None
+    
+    return jsonify({"reply": "you quited this task!"}), 200
+
 @bp.route("/quiz/end")
 def end():
     global cur_quiz
     cur_quiz = None
     
-    return jsonify({"reply": "The current quiz was completed!"})
+    # TODO summarize
+    
+    return jsonify({"reply": "The current quiz was completed!"}), 200
+
+@bp.route("/clear_cache", methods=["GET", "POST"])
+def clear_cache():
+    # TODO
+    pass
