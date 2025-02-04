@@ -3,7 +3,6 @@ window.addEventListener('beforeunload', (event) => {
     event.returnValue = '';
 });
 
-// TODO - Bug: button disable
 document.addEventListener("DOMContentLoaded", () => {
     const question = document.getElementById("question");
     const analysis = document.getElementById("analysis");
@@ -60,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 answerInput.style.display = "block";
                 if (data.props.type === "ListeningQuestion") {
                     content = data.props.solution;
-                    finishButton.disable = true;
+                    finishButton.disabled = true;
                     finishButton.textContent = "";
                     finishButton.appendChild(loading_icon);
                     try {
@@ -74,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     } catch (error) {
                         console.log(error)
                     }
-                    finishButton.disable = false;
+                    finishButton.disabled = false;
                     finishButton.removeChild(loading_icon);
                 }
             }
@@ -126,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     idx: cur_data.props.idx,
                     answer: answer
                 }
-                finishButton.disable = true;
+                finishButton.disabled = true;
                 finishButton.textContent = "";
                 finishButton.appendChild(loading_icon);
                 const response = await fetch("/chat/quiz/mark", {
@@ -144,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     `Your answer: ${answer}\n` +
                     `Score: ${data.score}\n` +
                     `${data.analysis}`;
-                finishButton.disable = false;
+                finishButton.disabled = false;
                 marked = true;
             } catch (error) {
                 console.log(error);
@@ -155,4 +154,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     finishButton.addEventListener("click", finish)
+    
+    answerInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            finishButton.click();
+        }
+    });
 });
