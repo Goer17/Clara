@@ -73,6 +73,6 @@ class Generator:
         except Exception as e:
             logger.error("Generator.gen_listening() : an error occurred when attempting to generate a listening question", e)
             return None
-    
+        
     def close(self):
         self.engine.close()

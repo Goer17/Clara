@@ -145,6 +145,10 @@ class Planner:
             logger.error(f"Planner.gen_quiz() : an error occurred while attempting to generate a quiz (node_number = {node_number}) (profile: {profile})", e)
             return None, None
     
+    def critic_task(self, quiz: Quiz) -> List[Dict[str, str]]:
+        # TODO
+        pass
+    
     def close(self):
         self.engine.close()
         self.retriever.close()

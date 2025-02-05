@@ -159,7 +159,7 @@ def quit():
     
     return jsonify({"reply": "you quited this task!"}), 200
 
-@bp.route("/quiz/end")
+@bp.route("/quiz/end", methods=["GET", "POST"])
 def end():
     global cur_quiz
     cur_quiz = None

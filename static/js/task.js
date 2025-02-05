@@ -1,6 +1,18 @@
+let started = false;
+
 window.addEventListener('beforeunload', (event) => {
     event.preventDefault();
-    event.returnValue = '';
+    event.returnValue = ''; 
+});
+
+window.addEventListener('unload', () => {
+    if (started) {
+        fetch('/chat/quiz/quit', {
+            method: 'GET',
+        });
+
+        navigator.sendBeacon('/chat/quiz/quit');
+    }
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -79,13 +91,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             if (cur_state == STATE.START) {
-                finishButton.innerText = "I am ready"
+                finishButton.innerText = "I am ready";
             }
             else if (cur_state == STATE.NEXT) {
-                finishButton.innerText = "Next ➡️"
+                finishButton.innerText = "Next ➡️";
             }
             else if (cur_state == STATE.CONFIRM) {
-                finishButton.innerText = "Confirm ✅"
+                finishButton.innerText = "Confirm ✅";
             }
         } catch (error) {
             console.log(error);
@@ -108,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 idx += 1;
                 cur_state = STATE.CONFIRM;
+                started = true;
             } catch (error) {}
         }
         else if (cur_state === STATE.NEXT) {
