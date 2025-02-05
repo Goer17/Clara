@@ -96,6 +96,7 @@ button {
 }
 
 button#send {
+    height: 8%;
     background-color: #3bb273;
     color: #ffffff;
 }
@@ -144,6 +145,8 @@ button#reset:hover {
     display: flex;
     flex-direction: row;
     justify-content: center;
+    height: 8%;
+    width: 80%;
 }
 
 #dictionary #search-box input#word {

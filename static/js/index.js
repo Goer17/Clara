@@ -5,6 +5,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const sendButton = document.getElementById("send");
     const resetButton = document.getElementById("reset")
 
+    const loading_icon = document.createElement("img");
+    loading_icon.src = "/static/imgs/circle-loading-3.gif";
+    loading_icon.id = "loading";
+
+    const loading_icon_s = document.createElement("img");
+    loading_icon_s.src = "/static/imgs/line-loading-2.gif";
+    loading_icon_s.id = "loading";
+
     function renderChatHistory(history) {
         history.forEach(({ role, content }) => {
             if ((role === "user" || role == "assistant") && content.trim() !== "") {
@@ -35,6 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
         appendMessage("user", message);
         input.value = "";
 
+        sendButton.disabled = true;
+        sendButton.textContent = "";
+        sendButton.appendChild(loading_icon_s);
+
         try {
             const response = await fetch("/chat/v1", {
                 method: "POST",
@@ -53,6 +65,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             appendMessage("assistant", "Error: " + error.message);
         }
+
+        sendButton.removeChild(loading_icon_s);
+        sendButton.textContent = "send";
+        sendButton.disabled = false;
     }
 
     async function resetMessage() {
@@ -77,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
     input.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
             event.preventDefault();
-            sendMessage();
+            sendButton.click();
         }
     });
 
@@ -91,7 +107,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function search() {
         const word = wordInput.value.trim().toLowerCase();
+        if (!word) return;
         request = {word : word}
+        
+        searchButton.disabled = true;
+        const span = searchButton.querySelector("span");
+        searchButton.replaceChild(loading_icon, span);
+
         try {
             appendMessage("assistant", `Searching "${word}" in dictionary...`)
             const response = await fetch("/chat/dictionary", {
@@ -114,6 +136,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             appendMessage("assistant", error)
         }
+
+        searchButton.replaceChild(span, loading_icon);
+        searchButton.disabled = false;
     }
 
     async function add_word() {
@@ -160,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
     wordInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
             event.preventDefault();
-            search();
+            searchButton.click();
         }
     });
 });

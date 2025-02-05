@@ -66,3 +66,10 @@ input:focus, textarea:focus {
     border-color: lightgreen;
     outline: none;
 }
+
+#loading {
+    max-width: 100%;   /* 限制图片最大宽度为父容器的宽度 */
+    max-height: 100%;  /* 限制图片最大高度为父容器的高度 */
+    display: block;    /* 防止图片在其父容器中显示为行内元素 */
+    margin: 0 auto;    /* 可选，居中显示 */
+}

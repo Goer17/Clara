@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const loading_icon = document.createElement("img");
     loading_icon.src = "/static/imgs/circle-loading-2.gif";
-    loading_icon.id = "loading"
+    loading_icon.id = "loading";
 
     async function render_task() {
         try {

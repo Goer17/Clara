@@ -1,7 +1,7 @@
 from flask import Flask, session
 
 app = Flask(__name__)
-app.secret_key = "123456789"
+app.secret_key = "clara"
 app.config["SESSION_TYPE"] = "filesystem"
 
 from blueprints.index import bp as index_bp
