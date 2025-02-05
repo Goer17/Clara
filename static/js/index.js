@@ -9,9 +9,14 @@ document.addEventListener("DOMContentLoaded", () => {
     loading_icon.src = "/static/imgs/circle-loading-3.gif";
     loading_icon.id = "loading";
 
+    const loading_icon_a = document.createElement("img");
+    loading_icon_a.src = "/static/imgs/circle-loading-1.gif";
+    loading_icon_a.id = "loading";
+
     const loading_icon_s = document.createElement("img");
     loading_icon_s.src = "/static/imgs/line-loading-2.gif";
     loading_icon_s.id = "loading";
+
 
     function renderChatHistory(history) {
         history.forEach(({ role, content }) => {
@@ -139,6 +144,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         searchButton.replaceChild(span, loading_icon);
         searchButton.disabled = false;
+
+        addButton.textContent = "+";
+        addButton.disabled = false;
     }
 
     async function add_word() {
@@ -151,6 +159,9 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             n_rela: 5
         }
+        addButton.textContent = "";
+        addButton.appendChild(loading_icon_a);
+        addButton.disabled = true;
         try {
             const w = cur_word
             appendMessage("assistant", `Adding "${cur_word}" to the vocabulary notebook...`)
@@ -168,6 +179,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.log(error)
         }
+        addButton.removeChild(loading_icon_a);
+        addButton.textContent = "✅";
     }
 
     function clear() {
