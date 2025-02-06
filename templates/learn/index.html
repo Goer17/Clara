@@ -11,9 +11,17 @@
     <div id="task-list">
         {% for task in task_list %}
             <a href="task?name={{ task }}" class="task-link" target="_blank">
-                <strong>TASK</strong><br>
+                <strong id="task-title">TASK</strong><br>
                 <em>To Be Completed...</em><br><br>
                 {{ task }}
+            </a>
+        {% endfor %}
+        <hr id="partition">
+        {% for mistake in mistake_list %}
+            <a href="task?name={{ mistake }}&type=mistake" class="task-link mistake-link" target="_blank">
+                <strong id="mistake-title">MISTAKES</strong><br>
+                <em>To Be Completed...</em><br><br>
+                {{ mistake }}
             </a>
         {% endfor %}
     </div>

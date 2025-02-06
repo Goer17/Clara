@@ -209,6 +209,7 @@ class ListeningQuestion(Question):
 
 class Quiz:
     def __init__(self):
+        self.filepath = None
         self.knowledges: List[MemoryNode] = []
         self.problemset: Dict[str, List[Question]] = defaultdict(list)
         self.description: str = "The is a vocabulary learning task with several questions."
@@ -366,7 +367,7 @@ class Quiz:
         print("> This quiz was completed!")
     
     def save(self, path: str | Path = Path("material") / "quiz") -> str:
-        quiz_dat = {}
+        quiz_dat = {"description": self.description}
         quiz_dat["Knowledges"] = []
         for node in self.knowledges:
             quiz_dat["Knowledges"].append(node.get_prop("m_id"))
@@ -404,6 +405,8 @@ class Quiz:
             logger.error(f"Quiz.load() : an error ocurred while attempting to load a knowledge from quiz {filepath}", e)
             return None
         quiz = Quiz()
+        if "description" in quiz_dat:
+            quiz.description = quiz_dat["description"]
         knowledges = quiz_dat.pop("Knowledges", [])
         for m_id in knowledges:
             try:
@@ -437,4 +440,5 @@ class Quiz:
                         logger.error(f"Quiz.load() : an error occurred while attempting to load a question from quiz : {filepath}", e)
                 q = question_class(content, solution, rela_nodes, analysis)
                 quiz.addq(q)
+            quiz.filepath = filepath
         return quiz

@@ -32,8 +32,27 @@
     font-family: monospace;
 }
 
+#task-list a.mistake-link {
+    border: 2px solid #ff0000;
+}
+
+#task-list a.mistake-link #mistake-title {
+    color: red;
+}
+
+
 #task-list a.task-link:hover {
     transform: translateY(-2px); /* 向上浮动 */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 添加阴影 */
     transition: all 0.2s ease; /* 平滑过渡 */
+}
+
+
+
+hr#partition {
+    width: 100%;      /* 设置横线的宽度为100% */
+    height: 2px;      /* 设置横线的高度 */
+    background-color: #c3c3c3; /* 设置横线的颜色 */
+    border: none;     /* 去掉默认边框 */
+    margin: 20px 0;   /* 设置上下的间距 */
 }

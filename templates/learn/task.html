@@ -25,6 +25,7 @@
     </div>
     <script>
         const taskName = {{ name | tojson }};
+        const taskType = {{ task_type | tojson }};
     </script>
     <script src="{{ url_for('static', filename='js/task.js') }}"></script>
 </body>

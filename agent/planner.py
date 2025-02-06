@@ -1,4 +1,5 @@
 import asyncio, random
+import os
 import yaml
 from pathlib import Path
 from typing import (
@@ -146,8 +147,22 @@ class Planner:
             return None, None
     
     def critic_task(self, quiz: Quiz) -> List[Dict[str, str]]:
-        # TODO
-        pass
+        mistakes = Quiz()
+        mistakes.description = "This is a collection of mistakes based on a summary of your previous practice."
+        for q_type, problems in quiz.problemset.items():
+            low = {
+                "GapFillingQuestion": 0,
+                "ListeningQuestion": 0.9,
+                "SentenceMakingQuestion": 0.7
+            }[q_type]
+            for problem in problems:
+                if problem.score <= low:
+                    mistakes.addq(problem)
+        if mistakes.problemset:    
+            mistakes.save(Path("material") / "mistake")
+        os.remove(quiz.filepath)
+
+        return []
     
     def close(self):
         self.engine.close()

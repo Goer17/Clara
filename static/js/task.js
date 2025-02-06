@@ -1,14 +1,16 @@
 let started = false;
 
 window.addEventListener('beforeunload', (event) => {
-    event.preventDefault();
-    event.returnValue = ''; 
+    if (started) {
+        event.preventDefault();
+        event.returnValue = ''; 
+    }
 });
 
 window.addEventListener('unload', () => {
     if (started) {
         fetch('/chat/quiz/quit', {
-            method: 'GET',
+            method: 'GET'
         });
 
         navigator.sendBeacon('/chat/quiz/quit');
@@ -89,16 +91,26 @@ document.addEventListener("DOMContentLoaded", () => {
                     finishButton.removeChild(loading_icon);
                 }
             }
+            else if (data.type === "end") {
+                question.innerText = "Congratulations! You've completed this learning task.";
+                analysis.innerText = "Click the button below to close this page and wait for Clara to analyze your results.";
+                answerInput.style.display = "none";
+                cur_state = STATE.END;
+            }
 
-            if (cur_state == STATE.START) {
+            if (cur_state === STATE.START) {
                 finishButton.innerText = "I am ready";
             }
-            else if (cur_state == STATE.NEXT) {
+            else if (cur_state === STATE.NEXT) {
                 finishButton.innerText = "Next ➡️";
             }
-            else if (cur_state == STATE.CONFIRM) {
+            else if (cur_state === STATE.CONFIRM) {
                 finishButton.innerText = "Confirm ✅";
             }
+            else if (cur_state === STATE.END) {
+                finishButton.innerText = "Finished ✔️";
+            }
+
         } catch (error) {
             console.log(error);
         }
@@ -112,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({name: taskName})
+                    body: JSON.stringify({name: taskName, type: taskType})
                 });
                 const data = await response.json();
                 if (!response.ok) {
@@ -161,6 +173,16 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (error) {
                 console.log(error);
             }
+        }
+        else if (cur_state === STATE.END) {
+            started = false;
+            fetch("/chat/quiz/end", {
+                method: "GET",
+                keepalive: true
+            });
+            setTimeout(() => {
+                window.close();
+            }, 100);
         }
 
         render_task();

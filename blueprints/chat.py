@@ -98,7 +98,10 @@ def start():
         return jsonify({"error": "There is one ongoing quiz yet to be completed."}), 500
     data = request.json
     name = data.get("name")
-    filepath = Path("material") / "quiz" / f"{name}.json"
+    task_type = data.get("type")
+    place = "quiz" if task_type == "task" else "mistake"
+    filepath = Path("material") / place / f"{name}.json"
+    print(filepath)
     cur_quiz = Quiz.load(filepath, retriever)
     cur_quiz.init_cards()
     if isinstance(cur_quiz, Quiz):
@@ -162,9 +165,9 @@ def quit():
 @bp.route("/quiz/end", methods=["GET", "POST"])
 def end():
     global cur_quiz
+    f_quiz = cur_quiz
     cur_quiz = None
-    
-    # TODO summarize
+    results = planner.critic_task(f_quiz)
     
     return jsonify({"reply": "The current quiz was completed!"}), 200
 
