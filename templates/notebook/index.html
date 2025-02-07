@@ -2,6 +2,18 @@
 
 {% block title %}Clara - Notebook{% endblock title %}
 
-{% block content %}
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/notebook.css') }}">
+{% endblock style %}
 
+{% block content %}
+<div id="content-body">
+    <div id="word-list"></div>
+    <div id="footer">
+        <button id="pre">←</button>
+        <span id="cur-page">- 0 -</span>
+        <button id="next">→</button>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/notebook.js') }}"></script>
 {% endblock content %}

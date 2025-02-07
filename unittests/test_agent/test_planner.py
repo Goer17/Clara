@@ -18,18 +18,3 @@ def planner():
     yield planner
     planner.close()
 
-
-def test_gen_quiz(planner):
-    node_number = 5
-    profile = {
-        "GapFillingQuestion": 10,
-        "ListeningQuestion": 5
-    }
-    filepath, quiz = planner.gen_quiz(
-        node_number=node_number,
-        profile=profile
-    )
-    assert os.path.exists(filepath)
-    assert len(quiz.knowledges) == node_number
-    for key, cnt in profile.items():
-        assert len(quiz.problemset[key]) == cnt

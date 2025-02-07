@@ -3,7 +3,7 @@ import yaml
 from pathlib import Path
 from shortuuid import uuid
 from typing import (
-    Dict, List, Tuple, Literal
+    Dict, List, Tuple, Literal, Any
 )
 from chromadb import PersistentClient, Collection
 from utils.neo4j_orm import (
@@ -69,6 +69,9 @@ class MemoryNode:
             logger.info(f"MemoryNode.destroy() : rollback... successully added the node back to vector DB: {self._node}")
             return False
     
+    def dic(self) -> Dict[str, Any]:
+        return self._node._properties
+    
     def text(self, enclose: bool = False) -> str:
         result = (
             f"label: {self._node.label}\n",
@@ -128,12 +131,13 @@ class MemoryManager:
     def match_node(self,
                    node_profile: Dict[str, str | int | float] = {},
                    order: Tuple[str, Literal["ASC", "DESC"]] | None = None,
+                   skip: int | None = None,
                    limit: int | None = None
                    ) -> List[MemoryNode]:
         m_id = node_profile.pop("m_id", None)
         label = node_profile.pop("label", None)
         
-        node_list = self.__graph.match_node(m_id, label, node_profile, order, limit)
+        node_list = self.__graph.match_node(m_id, label, node_profile, order, skip, limit)
         memory_node_list = [MemoryNode(node, self.__collection) for node in node_list]
         
         return memory_node_list
@@ -217,9 +221,10 @@ class Retriever:
     def match_node(self,
                    node_profile: Dict[str, str | int | float] = {},
                    order: Tuple[str, Literal["ASC", "DESC"]] | None = None,
+                   skip: int | None = None,
                    limit: int | None = None
                    ) -> List[MemoryNode]:
-        return self.memory.match_node(node_profile, order, limit)
+        return self.memory.match_node(node_profile, order, skip, limit)
     
     def match(self,
               from_prop: Dict[str, str | int | float],

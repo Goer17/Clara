@@ -51,6 +51,29 @@ from utils.dictionary import (
     LLMDictionary, to_text
 )
 
+@bp.route("/query", methods=["GET", "POST"])
+def query():
+    data = request.json
+    profile = data.get("profile", {})
+    order = tuple(data.get("order"))
+    skip = data.get("skip")
+    limit = data.get("limit")
+    
+    try:    
+        results = retriever.match_node(
+            node_profile=profile,
+            order=order,
+            skip=skip,
+            limit=limit
+        )
+        response = []
+        for result in results:
+            response.append(result.dic())
+        return jsonify(response, 200)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    
 dic = LLMDictionary(gpt_4o)
 
 @bp.route("/dictionary", methods=["POST"])

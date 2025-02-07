@@ -1,0 +1,66 @@
+#content-body {
+    width: 80%;
+    height: 60%;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#word-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.word {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ccffcc; /* 更深的浅绿色 */
+    font-family: monospace;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.w {
+    font-weight: bold;
+    color: #006600; /* 深绿色 */
+}
+
+.f {
+    color: #004d00; /* 更深的绿色 */
+}
+
+/* 底部导航 */
+#footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 15px;
+}
+
+button {
+    background-color: #66cc66; /* 按钮颜色 */
+    color: white;
+    font-size: 18px;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: #559955;
+}
+
+#cur-page {
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: bold;
+    color: #004d00;
+}

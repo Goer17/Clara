@@ -55,6 +55,7 @@ class Graph:
             label: str | None = None,
             properties: Dict = {},
             order: Tuple[str, Literal["ASC", "DESC"]] | None = None,
+            skip: int | None = None,
             limit: int | None = None
         ) -> List['Node']:
         labels = ["memory"]
@@ -75,6 +76,8 @@ class Graph:
             if order is not None:
                 _k, _m = order
                 query += f"ORDER BY p.{_k} {_m}\n"
+            if skip is not None:
+                query += f"SKIP {skip}\n"
             if limit is not None:
                 query += f"LIMIT {limit}"
         try:
