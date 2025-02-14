@@ -207,8 +207,20 @@ base_url = os.environ["BASE_URL"]
 deepseek_api_kay = os.environ["DEEPSEEK_API_KEY"]
 deepseek_base_url = os.environ["DEEPSEEK_BASE_URL"]
 
+gpt_3_5 = LLMEngine(
+    model="gpt-3.5-turbo",
+    api_key=openai_api_key,
+    base_url=base_url
+)
+
 gpt_4o = LLMEngine(
     model="gpt-4o",
+    api_key=openai_api_key,
+    base_url=base_url
+)
+
+o1_mini = LLMEngine(
+    model="o1-mini",
     api_key=openai_api_key,
     base_url=base_url
 )
@@ -236,3 +248,10 @@ tts_hd = AMEngine(
     api_kay=openai_api_key,
     base_url=base_url
 )
+
+engine_list = {
+    "gpt-3.5-turbo": gpt_3_5,
+    "gpt-4o": gpt_4o,
+    "deepseek-v3": ds_chat,
+    "deepseek-r1": ds_reasoner
+}

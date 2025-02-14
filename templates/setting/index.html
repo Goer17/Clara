@@ -14,8 +14,8 @@
             <select id="model-select" name="model" class="form-control">
                 <option value="gpt-3.5-turbo">GPT-3.5</option>
                 <option value="gpt-4o">GPT-4O</option>
-                <option value="gpt-o1-mini">GPT-O1-mini</option>
-                <option value="deepseek-r1">DeepSeek R1</option>
+                <option value="deepseek-v3">DeepSeek-V3</option>
+                <option value="deepseek-r1">DeepSeek-R1</option>
             </select>
         </div>
 
@@ -27,6 +27,11 @@
         <button id="save" type="submit" class="btn">save</button>
     </form>
 </div>
+
+<script>
+    const model = {{ model | tojson }}
+    const temp = {{ temp | tojson }}
+</script>
 
 <script src="{{ url_for('static', filename='js/setting.js') }}"></script>
 {% endblock content %}

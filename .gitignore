@@ -170,3 +170,6 @@ chroma/
 
 # Cache
 cache/
+
+# Project
+unittests/

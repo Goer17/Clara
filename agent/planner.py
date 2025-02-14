@@ -13,7 +13,8 @@ from agent.retriever import (
     Retriever
 )
 from utils.general import (
-    LLMEngine
+    LLMEngine,
+    engine_list
 )
 from utils.questions import (
     Quiz
@@ -102,13 +103,19 @@ class Planner:
                 raise RuntimeError("There's no unfamiliar word.")
             for node in nodes:
                 quiz.addn(node)
+            with open(Path("config") / "setting" / "generator.yml") as f:
+                cfg = yaml.safe_load(f)
+                model = cfg.get("model", "gpt-4o")
+                self.generator.engine = engine_list.get(model, "gpt-4o")
+                temp = cfg.get("temp", 1.0)
+
             async def _addq(q_type, rela_nodes):
                 if q_type == "GapFillingQuestion":
-                    question = await self.generator.gen_gap_filling(rela_nodes)
+                    question = await self.generator.gen_gap_filling(rela_nodes, temp)
                 elif q_type == "ListeningQuestion":
-                    question = await self.generator.gen_listening(rela_nodes)
+                    question = await self.generator.gen_listening(rela_nodes, temp)
                 elif q_type == "SentenceMakingQuestion":
-                    question = await self.generator.gen_sentence_making(rela_nodes)
+                    question = await self.generator.gen_sentence_making(rela_nodes, temp)
                 else:
                     logger.error(f"Quiz.load() : unknown question class : {q_type}")
                     return

@@ -198,3 +198,19 @@ def end():
 def clear_cache():
     # TODO
     pass
+
+import yaml
+
+@bp.route("/setting", methods=["GET", "POST"])
+def setting():
+    data = request.json
+    with open(Path("config") / "setting" / "generator.yml", "r") as f:
+        cfg = yaml.safe_load(f)
+        if "model" in data:
+            cfg["model"] = data["model"]
+        if "temp" in data:
+            cfg["temp"] = float(data["temp"])
+    with open(Path("config") / "setting" / "generator.yml", "w") as f:
+        yaml.safe_dump(cfg, f)
+    
+    return jsonify({"reply": "successfully modified the setting!"}), 200

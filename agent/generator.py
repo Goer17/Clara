@@ -28,11 +28,11 @@ class Generator:
             config = yaml.safe_load(f)
             self.prompts_cfg = config
         
-    async def gen_gap_filling(self, rela_nodes: List[MemoryNode]) -> GapFillingQuestion:
+    async def gen_gap_filling(self, rela_nodes: List[MemoryNode], temp: float = 1.0) -> GapFillingQuestion:
         prompt = "\n\n".join(rela_node.text(enclose=True) for rela_node in rela_nodes)
         sys_prompt = self.prompts_cfg["GapFillingQuestion"]["sys_prompt"]
         few_shots = self.prompts_cfg["GapFillingQuestion"]["few_shots"]
-        response = await self.engine.async_generate(prompt, sys_prompt, few_shots)
+        response = await self.engine.async_generate(prompt, sys_prompt, few_shots, temperature=temp)
         try:
             response = Formatter.catch_json(response)
             content = response["question"]
@@ -43,11 +43,11 @@ class Generator:
             logger.error("Generator.gen_gap_filling() : an error occurred when attempting to generate a gap filling quesion", e)
             return None
     
-    async def gen_sentence_making(self, rela_nodes: List[MemoryNode]) -> SentenceMakingQuestion:
+    async def gen_sentence_making(self, rela_nodes: List[MemoryNode], temp: float = 1.0) -> SentenceMakingQuestion:
         prompt = "\n\n".join(rela_node.text(enclose=True) for rela_node in rela_nodes)
         sys_prompt = self.prompts_cfg["SentenceMakingQuestion"]["sys_prompt"]
         few_shots = self.prompts_cfg["SentenceMakingQuestion"]["few_shots"]
-        response = await self.engine.async_generate(prompt, sys_prompt, few_shots)
+        response = await self.engine.async_generate(prompt, sys_prompt, few_shots, temperature=temp)
         try:
             response = Formatter.catch_json(response)
             scenario = response["scenario"]
@@ -60,11 +60,11 @@ class Generator:
             logger.error("Generator.gen_sentence_making() : an error occurred when attempting to generate a sentence making quesion", e)
             return None
     
-    async def gen_listening(self, rela_nodes: List[MemoryNode]):
+    async def gen_listening(self, rela_nodes: List[MemoryNode], temp: float = 1.0):
         prompt = "\n\n".join(rela_node.text(enclose=True) for rela_node in rela_nodes)
         sys_prompt = self.prompts_cfg["ListeningQuestion"]["sys_prompt"]
         few_shots = self.prompts_cfg["ListeningQuestion"]["few_shots"]
-        response = await self.engine.async_generate(prompt, sys_prompt, few_shots)
+        response = await self.engine.async_generate(prompt, sys_prompt, few_shots, temperature=temp)
         try:
             response = Formatter.catch_json(response)
             sentence = response["sentence"]

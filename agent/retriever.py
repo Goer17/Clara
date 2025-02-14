@@ -179,7 +179,6 @@ class Retriever:
     def __init__(self, engine: LLMEngine):
         self.engine = engine
         self.memory = MemoryManager()
-        self.webcrawler = WebCrawler()
         retriever_path = Path("config") / "prompts" / "retriever.yml"
         with open(retriever_path) as f:
             self.all_prompts = yaml.safe_load(f)

@@ -7,4 +7,26 @@ document.addEventListener("DOMContentLoaded", () => {
     slider.addEventListener("input", () => {
         temperatureValue.textContent = slider.value;
     });
+
+    modelSelector.value = model;
+    slider.value = temp;
+    temperatureValue.textContent = temp.toFixed(2);
+
+    saveButton.addEventListener("click", event => {
+        event.preventDefault();
+        try {
+            fetch("/chat/setting", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: modelSelector.value,
+                    temp: slider.value
+                })
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    });
 });
