@@ -188,7 +188,7 @@ def quit():
 @bp.route("/quiz/end", methods=["GET", "POST"])
 def end():
     global cur_quiz
-    f_quiz = cur_quiz
+    f_quiz = cur_quiz # finished quiz
     cur_quiz = None
     results = planner.critic_task(f_quiz)
     
