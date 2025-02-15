@@ -22,7 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const analysis = document.getElementById("analysis");
     const answerInput = document.getElementById("answer");
     const finishButton = document.getElementById("finish");
-    
+    const player = document.getElementById("player")
+
     const STATE = {
         START: 'start',
         CONFIRM: 'confirm',
@@ -77,13 +78,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     finishButton.textContent = "";
                     finishButton.appendChild(loading_icon);
                     try {
-                        await fetch("/chat/quiz/play", {
+                        const response = await fetch("/chat/quiz/play", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
                             },
                             body: JSON.stringify({content: content, t: 2})
                         });
+                        if (response.ok) {
+                            const audioBlob = await response.blob();
+                            const audioUrl = URL.createObjectURL(audioBlob);
+                            player.src = audioUrl;
+                            player.play();
+                        }
                     } catch (error) {
                         console.log(error)
                     }

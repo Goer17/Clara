@@ -1,5 +1,5 @@
 import os, random, time
-from flask import Blueprint, render_template, session, request, jsonify
+from flask import Blueprint, render_template, session, request, jsonify, send_file
 
 bp = Blueprint('chat', __name__, url_prefix='/chat')
 
@@ -172,11 +172,9 @@ def play():
     content, t = data.get("content"), data.get("t")
     voice = random.choice(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'])
     name = tts_hd.generate(content, voice)
-    for _ in range(t):
-        time.sleep(2)
-        tts_hd.play(name)
+    audio_path = tts_hd.cache_path / f"{name}.mp3"
     
-    return jsonify({"reply": "ok"}), 200
+    return send_file(audio_path), 200
 
 @bp.route("quiz/quit", methods=["GET", "POST"])
 def quit():

@@ -69,7 +69,7 @@ class Planner:
             name = str(filename).split("/")[-1].removesuffix(".json")
             link = f"learn/task?name={name}"
             if filename is not None:
-                return f"A learning task has been created for the student, located at: [link]({link}). You can notify him or her to complete it now."
+                return f"A learning task has been created for the student (by model {self.generator.engine.model}), located at: [link]({link}). You can notify him or her to complete it now."
             else:
                 return "Something goes wrong."
         self.functions = {

@@ -406,7 +406,7 @@ class Quiz:
             return None
         quiz = Quiz()
         if "description" in quiz_dat:
-            quiz.description = quiz_dat["description"]
+            quiz.description = quiz_dat.pop("description")
         knowledges = quiz_dat.pop("Knowledges", [])
         for m_id in knowledges:
             try:
