@@ -41,47 +41,49 @@ GapFillingQuestion:
             ```
 
 SentenceMakingQuestion:
-    sys_prompt: |
-        You are an English teacher responsible for designing sentence-making exercises for students.  
-        I will provide you with specific words that students find challenging or have previously made mistakes with.
-        If I provide you with a mistake, your question should be similar to the common mistakes students make. You only need to make slight adjustments based on the student's error. 
-        These words and mistakes will be enclosed in ```txt```.
-        Your task is to create a scenario where students are required to use the given word in a sentence.
-        Respond in the following JSON format:
+  sys_prompt: |
+    You are an English teacher responsible for designing sentence-making exercises for students in a role-play style.
+    I will provide you with specific words that students find challenging or have previously made mistakes with.
+    These words and mistakes will be enclosed in ```txt```.
+    Your task is to create a role-play scenario where the student must use the given word in a sentence.
+    The scenario should involve a realistic situation where the student has to respond appropriately using the word or phrase in context.
+    Respond in the following JSON format:
+    ```json
+    {
+        "scenario": "...",
+        "role": "name: ...",
+        "answer": "your referenced answer",
+        "lang": ["...", "..."]
+    }
+    ```
+    - `scenario`: The detailed context or situation in which the student should respond.
+    - `role`: What the character says in this scenario.
+    - `answer`: A reference answer that demonstrates proper use of the word or phrase.
+    - `lang`: The linguistic elements tested, such as the word, phrase, or grammatical structure being targeted.
+
+  few_shots:
+    - role: user
+      content: |
+        ```txt
+        label: unfamiliar_word
+        abstract: abate
+        content:
+        [verb] to become less intense or widespread.
+        > The storm began to abate after several hours.
+        > She waited for the pain to abate before moving again.
+        ```
+    - role: assistant
+      content: |
+        Let's set up a role-play scenario where the student is asked to describe the change in the weather after a storm. 
+        This will help them practice using "abate" in a realistic context.
         ```json
         {
-            "scenario": "...",
-            "answer": "your referrenced answer",
-            "lang": ["...", "..."]
+            "scenario": "Imagine you're talking to a friend after a powerful storm. The storm has finally started to calm down. You need to describe the changes you noticed.",
+            "role": "Jack: 'Wow, it was so intense earlier! How is it now?'",
+            "answer": "The storm began to abate as the winds slowed, and the rain lessened.",
+            "lang": ["abate", "begin to abate"]
         }
         ```
-        - `scenario`: A realistic and practical situation where the word or phrase could be used in everyday life.
-        - `answer`: Your reference answer for the scenario.
-        - `lang`: The linguistic elements relevant to the question, such as the word, phrase, or grammatical structure being tested.
-        Before generating the final question, take a moment to briefly reason through the process to ensure clarity and relevance.
-    
-    few_shots:
-        - role: user
-          content: |
-            ```txt
-            label: unfamiliar_word
-            abstract: abate
-            content:
-            [verb] to become less intense or widespread.
-            > The storm began to abate after several hours.
-            > She waited for the pain to abate before moving again.
-            ```
-        - role: assistant
-          content: |
-            The word 'abate' is often used to describe the reduction in intensity of something unpleasant, such as a storm, pain, or fear.
-            A realistic scenario involving a storm allows students to contextualize the word naturally, making it easier to grasp its meaning and usage.
-            ```json
-            {
-                "scenario": "Imagine a situation where a severe storm has been raging all night. Describe what happens when the storm starts to calm down.",
-                "answer": "The storm began to abate as the winds slowed, and the rain lessened, bringing a sense of relief to the residents.",
-                "lang": ["abate", "begin to abate"]
-            }
-            ```
         
 
 ListeningQuestion:

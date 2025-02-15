@@ -92,7 +92,6 @@ class SentenceMakingQuestion(Question):
         sys_prompt, few_shots = all_prompts["SentenceMakingQuestion"]["sys_prompt"], all_prompts["SentenceMakingQuestion"]["few_shots"]
         prompt = (
             f"scenario: {self.content}\n",
-            f"answer: {self.solution}\n",
             f"lang: {', '.join(self.analysis)}\n",
             f"student's answer: {answer}\n"
         )
@@ -102,7 +101,7 @@ class SentenceMakingQuestion(Question):
             if "RIGHT" in response:
                 return [], ""
             response = Formatter.catch_json(response)
-            return response["mistakes"], response["polished"]
+            return response["mistakes"], response["polished"], response["score"]
         except Exception as e:
             logger.error(f"SentenceMakingQuestion.__feedback() : an error ocurred while attempting to generate feedback of student's answer: {answer}", e)
             return [], ""
@@ -111,8 +110,8 @@ class SentenceMakingQuestion(Question):
         super().mark(answer, engine)
         if len(answer) == 0:
             return 0, self.analysis, []
-        mistakes, polished = self.__feedback(answer, engine)
-        self.score = max(0, 1 - len(mistakes) / 4)
+        mistakes, polished, score = self.__feedback(answer, engine)
+        self.score = min(1, score / 10)
         feedbacks = [
             {
                 "abstract": ", ".join(mistakes),

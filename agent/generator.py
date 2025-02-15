@@ -50,7 +50,7 @@ class Generator:
         response = await self.engine.async_generate(prompt, sys_prompt, few_shots, temperature=temp)
         try:
             response = Formatter.catch_json(response)
-            scenario = response["scenario"]
+            scenario = response["scenario"] + "\n\n\n\n" + response["role"]
             solution = response["answer"]
             lang = response["lang"]
             question = SentenceMakingQuestion(scenario, solution, rela_nodes, analysis=lang)

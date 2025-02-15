@@ -159,12 +159,20 @@ class Planner:
         for q_type, problems in quiz.problemset.items():
             low = {
                 "GapFillingQuestion": 0,
-                "ListeningQuestion": 0.9,
-                "SentenceMakingQuestion": 0.7
+                "ListeningQuestion": 0.85,
+                "SentenceMakingQuestion": 0.6
             }[q_type]
             for problem in problems:
                 if problem.score <= low:
                     mistakes.addq(problem)
+                else:
+                    for node in problem.rela_nodes:
+                        if node.label == "unfamiliar_word":
+                            familiarity = node.get_prop("familiarity") + 10
+                            node.set_prop("familiarity", familiarity)
+                            if familiarity >= 100:
+                                node.set_label("word")
+                            
         if mistakes.problemset:    
             mistakes.save(Path("material") / "mistake")
         os.remove(quiz.filepath)

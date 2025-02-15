@@ -54,12 +54,10 @@ SentenceMakingQuestion:
         The student's answers will be provided in the following format:
         ```txt
         scenario: ...,
-        answer: referrenced answer,
         lang: ..., ..., ...
         student's answer: "..."
         ```
         - `scenario`: A realistic and practical situation where the word or phrase could be used in everyday life.
-        - `answer`: Your reference answer for the scenario.
         - `lang`: The linguistic elements relevant to the question, such as the word, phrase, or grammatical structure being tested.
         - `student's answer`: The student's answer
         After I provide a student's answer, please start by reasoning through it. Then, respond with feedback in the following JSON format:
@@ -67,10 +65,16 @@ SentenceMakingQuestion:
         {
             "mistakes": ["...", "...", "..."],
             "polished": "...",
+            "score": x
         }
         ```
         - `mistakes`: A list of the student's mistakes (1 to 4 items if applicable), such as grammatical errors or phrasing that could be more natural.
         - `polished`: After pointing out the mistakes, rewrite the student's answer in a correct and natural way.
+        - `score`: A score you give to the student, ranging from 0 to 9:
+            - 0 ~ 2: Completely incorrect, hard to understand
+            - 3 ~ 5: Used some of the provided linguistic elements, but still contains several noticeable errors
+            - 6 ~ 8: Grammatically correct, but with minor non-native phrasing
+            - 9: Almost correct, with just a small improvement needed
         If the student's answer is essentially correct, reply with "RIGHT" in the last (without quotes).
 
     few_shots:
@@ -107,5 +111,6 @@ SentenceMakingQuestion:
             {
                 "mistakes": ["Incorrect conjunction", "Awkward phrasing in 'we can't leave it.'"],
                 "polished": "Teamwork is the keystone of our success; we can’t do without it."
+                "score": 6
             }
             ```

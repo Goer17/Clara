@@ -14,4 +14,4 @@
 - [X] Implement the ORM Memory Class and ORM Retriever
 - [X] Other question : sentence-making & listening
 - [X] Quiz shell interaction & Mistake node
-- [ ] GUI
+- [X] GUI
