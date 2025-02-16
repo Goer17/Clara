@@ -2,6 +2,7 @@ import asyncio, random
 import os
 import yaml
 from pathlib import Path
+from collections import defaultdict
 from typing import (
     List, Dict, Tuple
 )
@@ -11,6 +12,9 @@ from agent.generator import (
 from agent.retriever import (
     MemoryNode,
     Retriever
+)
+from utils.string import (
+    Formatter
 )
 from utils.general import (
     LLMEngine,
@@ -59,9 +63,9 @@ class Planner:
             }
         ]
         def generate_task():
-            n = 7
+            n = 5
             config = {
-                "GapFillingQuestion": 2 * n,
+                "GapFillingQuestion": n,
                 "ListeningQuestion": n,
                 "SentenceMakingQuestion": n
             }
@@ -129,19 +133,24 @@ class Planner:
                 ]:
                     logger.error(f"Quiz.load() : unknown question class : {q_type}")
                     continue
+                topic = {
+                    "GapFillingQuestion": "grammar",
+                    "SentenceMakingQuestion": "grammar",
+                    "ListeningQuestion": "listening"
+                }
                 for i in range(cnt):
                     node = nodes[i % n]
                     matchs = self.retriever.match(
-                        from_prop={"m_id": node.get_prop("m_id")},
-                        to_prop={"label": "mistake", "type": q_type},
-                        rela_prop={"label": "relative"},
+                        from_prop={"label": "topic", "abstract": topic},
+                        to_prop={"label": "weakness"},
+                        rela_prop={"label": "belong"},
                         bidirect=True
                     )
-                    mistakes = [match[2] for match in matchs]
+                    w_list = [match[2] for match in matchs]
                     rela_nodes = [node]
-                    if len(mistakes) > 0:
+                    if len(w_list) > 0:
                         rela_nodes.append(
-                            random.choices(mistakes)[0]
+                            random.choices(w_list)[0]
                         )
                     coro_list.append(
                         _addq(q_type, rela_nodes)
@@ -156,6 +165,7 @@ class Planner:
     def critic_task(self, quiz: Quiz) -> List[Dict[str, str]]:
         mistakes = Quiz()
         mistakes.description = "This is a collection of mistakes based on a summary of your previous practice."
+        f_prompt = ""
         for q_type, problems in quiz.problemset.items():
             low = {
                 "GapFillingQuestion": 0,
@@ -165,17 +175,64 @@ class Planner:
             for problem in problems:
                 if problem.score <= low:
                     mistakes.addq(problem)
+                    f_prompt += (
+                        f"type: {q_type}\n"
+                        f"question: {problem.question()}\n"
+                        f"student's answer: {problem.answer}\n"
+                        f"right answer: {problem.solution}\n\n"
+                    )
                 else:
                     for node in problem.rela_nodes:
                         if node.label == "unfamiliar_word":
-                            familiarity = node.get_prop("familiarity") + 10
+                            familiarity = node.get_prop("familiarity")
+                            if familiarity is None:
+                                familiarity = 0
+                            familiarity += 10
                             node.set_prop("familiarity", familiarity)
                             if familiarity >= 100:
                                 node.set_label("word")
+                            node.update()
+                        elif node.label == "weakness" and node._node._alive:
+                            familiarity = node.get_prop("familarity")
+                            if familiarity is None:
+                                familiarity = 0
+                            familiarity += 25
+                            node.set_prop("familiarity", familiarity)
+                            if familiarity >= 100:
+                                node.destroy()
                             
         if mistakes.problemset:    
             mistakes.save(Path("material") / "mistake")
         os.remove(quiz.filepath)
+        
+        if len(f_prompt) == 0:
+            return []
+        
+        with open(Path("config") / "prompts" / "planner.yml") as f:
+            cfg = yaml.safe_load(f)
+            sys_prompt = cfg["critic"]["sys_prompt"]            
+        response = self.engine.generate(
+            prompt=f_prompt,
+            sys_prompt=sys_prompt
+        )    
+        data = Formatter.catch_json(response)
+        for w_type in ["grammar", "listening"]:
+            w_list = data.get(w_type, [])
+            if len(w_type) == 0:
+                continue
+            result = self.retriever.match_node({"label": "topic", "abstract": w_type})
+            if len(result) > 0:
+                topic_node = result[0]
+            elif len(result) == 0:
+                topic_node = self.retriever.remember({"label": "topic", "abstract": w_type, "content": ""}, n_rela=0)
+            if topic_node is None:
+                continue
+            for w in w_list:
+                try:
+                    w_node = self.retriever.remember({"label": "weakness", "abstract": w["abstract"], "content": w["content"], "familiarity": 0}, n_rela=0)
+                    w_node.create_rela(topic_node, label="belong", properties={})
+                except Exception as e:
+                    logger.error(f"Planner.critic_task() : one error occurred while attempting to critic one quiz.", e)
 
         return []
     

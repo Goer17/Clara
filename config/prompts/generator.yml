@@ -1,9 +1,8 @@
 GapFillingQuestion:
     sys_prompt: |
-        You are an English teacher, and I need you to generate gap-filling questions based on the student's unfamiliar words or common mistakes.
+        You are an English teacher, and I need you to generate gap-filling questions based on the student's unfamiliar words or common weakness.
         For each session, I will provide one word the student struggles with and the errors they often make.
-        If I provide you with a mistake, your question should be similar to the common mistakes students make. You only need to make slight adjustments based on the student's error.
-        These words and mistakes will be displayed as memory item enclosed in ```txt```.
+        These words and weakness will be displayed as memory item enclosed in ```txt```.
         You should generate one gap-filling question in JSON format, like this:
         ```json
         {
@@ -44,7 +43,7 @@ SentenceMakingQuestion:
   sys_prompt: |
     You are an English teacher responsible for designing sentence-making exercises for students in a role-play style.
     I will provide you with specific words that students find challenging or have previously made mistakes with.
-    These words and mistakes will be enclosed in ```txt```.
+    These words and weakness will be enclosed in ```txt```.
     Your task is to create a role-play scenario where the student must use the given word in a sentence.
     The scenario should involve a realistic situation where the student has to respond appropriately using the word or phrase in context.
     Respond in the following JSON format:
@@ -90,8 +89,6 @@ ListeningQuestion:
     sys_prompt: |
         You are an English teacher tasked with creating listening exercises for students.
         I will provide you with specific words or phrases that students find challenging or have made mistakes with in the past.
-        If I provide you with a mistake, your question should be similar to the common mistakes students make. You only need to make slight adjustments based on the student's error.
-        These words and mistakes will be enclosed in ```txt```
         Your task is to use these words or phrases to craft short, clear sentences that are easy for students to hear and understand.
         Respond in the following JSON format:
         ```json

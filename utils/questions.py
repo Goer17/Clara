@@ -99,12 +99,12 @@ class SentenceMakingQuestion(Question):
         try:
             response = engine.generate(prompt, sys_prompt, few_shots)
             if "RIGHT" in response:
-                return [], ""
+                return [], "", 1
             response = Formatter.catch_json(response)
             return response["mistakes"], response["polished"], response["score"]
         except Exception as e:
             logger.error(f"SentenceMakingQuestion.__feedback() : an error ocurred while attempting to generate feedback of student's answer: {answer}", e)
-            return [], ""
+            return [], "", 0
     
     def mark(self, answer, engine):
         super().mark(answer, engine)
