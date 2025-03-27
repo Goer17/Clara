@@ -17,4 +17,4 @@ app.register_blueprint(notebook_bp)
 app.register_blueprint(setting_bp)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8088)

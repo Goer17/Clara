@@ -32,7 +32,7 @@ class Question(ABC):
                  content: str,
                  solution: str,
                  rela_nodes: List[MemoryNode],
-                 analysis: str = None,
+                 analysis: str | List[str] = None,
                  *args, **kwargs
                  ):
         self.content = content
@@ -86,7 +86,7 @@ class SentenceMakingQuestion(Question):
         super().__init__(content, solution, rela_nodes, analysis, *args, **kwargs)
     
     def question(self, hint = False):
-        return self.content
+        return self.content + f"\n[{', '.join(self.analysis)}]"
 
     def __feedback(self, answer: str, engine: LLMEngine) -> Tuple[List[str], str]:
         sys_prompt, few_shots = all_prompts["SentenceMakingQuestion"]["sys_prompt"], all_prompts["SentenceMakingQuestion"]["few_shots"]
@@ -99,12 +99,12 @@ class SentenceMakingQuestion(Question):
         try:
             response = engine.generate(prompt, sys_prompt, few_shots)
             if "RIGHT" in response:
-                return [], "", 1
+                return [], "", 10
             response = Formatter.catch_json(response)
             return response["mistakes"], response["polished"], response["score"]
         except Exception as e:
             logger.error(f"SentenceMakingQuestion.__feedback() : an error ocurred while attempting to generate feedback of student's answer: {answer}", e)
-            return [], "", 0
+            return [], "", 6
     
     def mark(self, answer, engine):
         super().mark(answer, engine)
@@ -119,7 +119,7 @@ class SentenceMakingQuestion(Question):
             }
         ]
         
-        return self.score, self.analysis, feedbacks
+        return self.score, f"Polished version: {polished}", feedbacks
         
 
 class ListeningQuestion(Question):

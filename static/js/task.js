@@ -117,7 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
             else if (cur_state === STATE.END) {
                 finishButton.innerText = "Finished ✔️";
             }
-
         } catch (error) {
             console.log(error);
         }
@@ -171,9 +170,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!response.ok) {
                     throw data.error;
                 }
-                analysis.innerText = `Right answer: ${data.solution}\n` +
-                    `Your answer: ${answer}\n` +
-                    `Score: ${data.score}\n` +
+                analysis.innerText = `🙆✅: ${data.solution}\n` +
+                    `🙇🏻➡️: ${answer}\n` +
+                    `score: [${data.score.toFixed(2)} / 1.00]\n` +
                     `${data.analysis}`;
                 finishButton.disabled = false;
                 marked = true;

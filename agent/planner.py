@@ -137,13 +137,13 @@ class Planner:
                     "GapFillingQuestion": "grammar",
                     "SentenceMakingQuestion": "grammar",
                     "ListeningQuestion": "listening"
-                }
+                }[q_type]
                 for i in range(cnt):
                     node = nodes[i % n]
                     matchs = self.retriever.match(
                         from_prop={"label": "topic", "abstract": topic},
                         to_prop={"label": "weakness"},
-                        rela_prop={"label": "belong"},
+                        rela_prop={},
                         bidirect=True
                     )
                     w_list = [match[2] for match in matchs]
@@ -198,6 +198,7 @@ class Planner:
                                 familiarity = 0
                             familiarity += 25
                             node.set_prop("familiarity", familiarity)
+                            node.update()
                             if familiarity >= 100:
                                 node.destroy()
                             

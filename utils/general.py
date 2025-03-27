@@ -174,6 +174,7 @@ class AMEngine:
         self.model = model
 
     def generate(self, text: str, voice: str) -> str:
+        logger.info(f"text: {text}, voice: {voice}")
         tag = f"[{voice}] : {text}".encode('utf-8')
         name = f"audio[{hashlib.md5(tag).hexdigest()}]"
         filename = f"{name}.mp3"
@@ -188,7 +189,8 @@ class AMEngine:
             input=text
         )
         response.write_to_file(path)
-
+        logger.info(f"AMEngine.generate() : an audio file was successfully generated: {str(path)}")
+        
         return name
         
     @staticmethod
@@ -245,6 +247,12 @@ tts = AMEngine(
 
 tts_hd = AMEngine(
     model="tts-1-hd",
+    api_kay=openai_api_key,
+    base_url=base_url
+)
+
+tts_hd_1106 = AMEngine(
+    model="tts-1-hd-1106",
     api_kay=openai_api_key,
     base_url=base_url
 )

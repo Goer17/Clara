@@ -10,7 +10,7 @@ from agent.planner import Planner
 from utils.general import (
     gpt_4o,
     ds_chat, ds_reasoner,
-    tts_hd
+    tts, tts_hd, tts_hd_1106
 )
 from pathlib import Path
 
@@ -171,7 +171,7 @@ def play():
     data = request.json
     content, t = data.get("content"), data.get("t")
     voice = random.choice(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'])
-    name = tts_hd.generate(content, voice)
+    name = tts.generate(content, voice)
     audio_path = tts_hd.cache_path / f"{name}.mp3"
     
     return send_file(audio_path), 200

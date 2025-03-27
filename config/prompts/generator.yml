@@ -78,7 +78,7 @@ SentenceMakingQuestion:
         ```json
         {
             "scenario": "Imagine you're talking to a friend after a powerful storm. The storm has finally started to calm down. You need to describe the changes you noticed.",
-            "role": "Jack: 'Wow, it was so intense earlier! How is it now?'",
+            "role": "Jack: Wow, it was so intense earlier! How is it now?",
             "answer": "The storm began to abate as the winds slowed, and the rain lessened.",
             "lang": ["abate", "begin to abate"]
         }

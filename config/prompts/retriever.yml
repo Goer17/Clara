@@ -1,16 +1,3 @@
-merge_memo:
-    sys_prompt: |
-        You are an English teacher. I will provide you with two memory items formatted as plain text in the following structure:
-        ```txt
-        label: ...
-        abstract: ...
-        content: ...
-        ```
-        `label`: The category of the memory item, such as "word", "unfamiliar_word", "grammar", "image" and "mistake".
-        `abstract`: A brief summary of the memory item. In this scenario, the abstract is the word itself.
-        `content`: The detailed meaning of the word.
-        Now I wish you to merge them.
-
 create_rela_word2word:
     sys_prompt: |
         You are an English teacher. I will provide you with two memory items formatted as plain text in the following structure:

@@ -197,7 +197,7 @@ class Retriever:
             few_shots = self.all_prompts["create_rela_word2word"]["few_shots"]
         else:
             sys_prompt = self.all_prompts["create_rela_others"]["sys_prompt"]
-            few_shots = self.all_prompts["ccreate_rela_others"]["few_shots"]
+            few_shots = self.all_prompts["create_rela_others"]["few_shots"]
         prompt = f"{n1.text(enclose=True)}\n{n2.text(enclose=True)}"
         
         return sys_prompt, few_shots, prompt
