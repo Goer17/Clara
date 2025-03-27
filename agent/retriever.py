@@ -88,7 +88,7 @@ class MemoryManager:
     def __init__(self):
         uri = "bolt://localhost:7687"
         username = "neo4j"
-        password = "Yy030518neo4j"
+        password = "clara-neo4j"
         
         self.__graph = Graph(
             uri=uri,
@@ -172,8 +172,6 @@ class MemoryManager:
     
     def close(self):
         self.__graph.close()
-
-from agent.webcrawler import WebCrawler
 
 class Retriever:
     def __init__(self, engine: LLMEngine):

@@ -179,7 +179,7 @@ class AMEngine:
         name = f"audio[{hashlib.md5(tag).hexdigest()}]"
         filename = f"{name}.mp3"
         if not os.path.exists(AMEngine.cache_path):
-            os.makedirs(path=AMEngine.cache_path)
+            os.makedirs(AMEngine.cache_path)
         path = self.cache_path / filename
         if os.path.exists(path):
             return name
