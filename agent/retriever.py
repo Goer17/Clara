@@ -86,7 +86,7 @@ class MemoryNode:
 
 class MemoryManager:
     def __init__(self):
-        uri = "bolt://localhost:7687"
+        uri = "bolt://neo4j:7687"
         username = "neo4j"
         password = "clara-neo4j"
         
