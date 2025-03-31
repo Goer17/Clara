@@ -31,7 +31,7 @@ OpenAI SDK (LLM integration), Neo4j (graph database), ChromaDB (vector database)
 
 ---
 
-[<img src="assets/image-20250401021306261.png" alt="image-20250401021306261" style="zoom: 20%;" />](https://flask.palletsprojects.com/)
+[<img src="assets/flask.png" alt="image-20250401021306261" style="zoom: 20%;" />](https://flask.palletsprojects.com/)
 
 
 
