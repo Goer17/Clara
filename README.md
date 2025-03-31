@@ -17,23 +17,9 @@ Meet **Clara** - your personal AI English coach! Through personalized AI-generat
 
 
 
-
-
 ### Built With
 
 OpenAI SDK (LLM integration), Neo4j (graph database), ChromaDB (vector database), and Flask (backend).
-
----
-
-[<img src="assets/neo4j.png" alt="image-20250401014238144" style="zoom:33%;" />](https://neo4j.com/)
-
----
-
-[<img src="assets/chroma.png" alt="image-20250401014327600" style="zoom:33%;" />][https://docs.trychroma.com/]
-
----
-
-[<img src="assets/flask.png" alt="image-20250401021306261" style="zoom: 20%;" />](https://flask.palletsprojects.com/)
 
 
 
