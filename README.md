@@ -9,6 +9,8 @@
 </div>
 Meet **Clara** - your personal AI English coach! Through personalized AI-generated exercises, Clara provides interactive learning tasks tailored to each student's needs. Below is an overview of its core workflow.
 
+
+
 <img src="assets/pipeline.png" style="zoom:50%;" />
 
 <img src="assets/GUI.png" style="zoom:80%;" />
