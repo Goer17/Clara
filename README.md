@@ -7,9 +7,9 @@
     🤖 Clara is an LLM-powered agent integrated with a graph database and other tools, designed to assist non-native students in learning English.
   </p>
 </div>
+
+
 Meet **Clara** - your personal AI English coach! Through personalized AI-generated exercises, Clara provides interactive learning tasks tailored to each student's needs. Below is an overview of its core workflow.
-
-
 
 <img src="assets/pipeline.png" style="zoom:50%;" />
 
