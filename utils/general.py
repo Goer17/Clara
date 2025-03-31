@@ -204,7 +204,7 @@ class AMEngine:
 load_dotenv(find_dotenv())
 
 openai_api_key = os.environ["OPENAI_API_KEY"]
-base_url = os.environ["BASE_URL"]
+base_url = os.environ["OPENAI_BASE_URL"]
 
 deepseek_api_kay = os.environ["DEEPSEEK_API_KEY"]
 deepseek_base_url = os.environ["DEEPSEEK_BASE_URL"]
