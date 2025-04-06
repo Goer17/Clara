@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function search() {
         const word = wordInput.value.trim().toLowerCase();
         if (!word) return;
-        request = {word : word}
+        const request = {word : word}
         
         searchButton.disabled = true;
         const span = searchButton.querySelector("span");
@@ -132,12 +132,34 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) {
                 throw data.error
             }
-            result.querySelector("#abstract h2").textContent = word
-            result.querySelector("pre").textContent = data.reply
-            result.style.display = ""
-            cur_word = word
-            cur_content = data.reply
-            appendMessage("assistant", `✅ Completed!\n${word}\n${data.reply}`)
+            result.querySelector("#abstract h2").textContent = word;
+            result.querySelector("pre").textContent = data.reply;
+            result.style.display = "";
+            cur_word = word;
+            cur_content = data.reply;
+            appendMessage("assistant", `✅ Completed!\n${word}\n${data.reply}`);
+
+            appendMessage("assistant", `Trying to search images in the internet...`);
+            
+            const image_request = {
+                query: word,
+                max_n: 5
+            };
+            const reponse = await fetch("/chat/image", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(image_request)
+            });
+            const urls = await response.json()
+            
+            if (!response.ok) {
+                throw data.error
+            }
+            console.log(urls);
+            
+            // TODO: ...
         } catch (error) {
             appendMessage("assistant", error)
         }

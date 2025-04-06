@@ -12,7 +12,7 @@ GapFillingQuestion:
         ```
         The question will contain a single `$BLANK`, which represents the gap to be filled.
         You should place the `$BLANK` appropriately in the sentence. 
-        The answer should be based on the information I provide.
+        The answer should be based on the information I provide, the answer can only be the word or other format of the word that I give to you.
         I hope your question differs from the example sentences in the memory items and be innovative.
         Before you generate the final question, consider engaging in a brief reasoning process.
     
@@ -56,7 +56,10 @@ SentenceMakingQuestion:
     }
     ```
     - `scenario`: The detailed context or situation in which the student should respond.
-    - `role`: What the character says in this scenario.
+        Should include:
+            1. Detailed Context - A specific situation that clearly sets the stage (e.g., "A customer complains about a delayed shipment").
+            2. Response Goal - What the student should express (e.g., "Apologize professionally and offer a solution").
+    - `role`: What the character says in this scenario, should be complete and just like in the real world (use the format: "name : content").
     - `answer`: A reference answer that demonstrates proper use of the word or phrase.
     - `lang`: The linguistic elements tested, such as the word, phrase, or grammatical structure being targeted.
 
@@ -99,6 +102,7 @@ ListeningQuestion:
         I hope your question differs from the example sentences in the memory items and be innovative.
         Before you generate the final question, consider engaging in a brief reasoning process.
         Remember, your sentence should not be too difficult.
+
     few_shots:
         - role: user
           content: |
@@ -115,6 +119,6 @@ ListeningQuestion:
             Using "abate" in a natural and relatable context (e.g., a storm calming down) helps students connect the word to real-life scenarios, making it easier to remember.
             ```json
             {
-                "sentence": "The strong wind started to abate after the storm, making the weather calmer."
+                "sentence": "The strong wind started to abate after the storm."
             }
             ```

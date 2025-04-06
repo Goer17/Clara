@@ -1,5 +1,6 @@
 import os, random, time
 from flask import Blueprint, render_template, session, request, jsonify, send_file
+import requests
 
 bp = Blueprint('chat', __name__, url_prefix='/chat')
 
@@ -106,6 +107,49 @@ def remember():
         if node is None:
             raise RuntimeError(f"Failed to remember node: {profile}")
         return jsonify({"reply": f"One node was Remembered : {node}"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.route("/image", methods=["POST"])
+def image():
+    data = request.json
+    try:
+        uri = os.environ["IMAGES_SERVER_URI"]
+        query = data["query"]
+        text = f"Requirement: The image should be related to the word **{query}** and help students remember its meaning. There shouldn't be too much text on the image."
+        max_n = data.get("max_n", 5)
+        node = retriever.match_node({"label": "unfamiliar_word", "abstract": query.lower()})[0]
+
+        response = requests.post(
+            uri,
+            json={
+                "query": query,
+                "text": text,
+                "max_n": max_n
+            },
+            headers={
+                "Content-Type": "application/json"
+            }
+        )
+        response.raise_for_status()
+        urls = response.json()
+
+        for i, url in enumerate(urls):
+            image_node = retriever.remember(
+                {
+                    "label": "image",
+                    "abstract": f"image-{query}-{i}",
+                    "content": url["url"]
+                },
+                n_rela=0
+            )
+            image_node.create_rela(
+                to=node,
+                label="display",
+                properties={}
+            )
+        return jsonify({"urls": urls}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

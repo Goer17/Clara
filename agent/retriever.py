@@ -86,9 +86,9 @@ class MemoryNode:
 
 class MemoryManager:
     def __init__(self):
-        uri = "bolt://neo4j:7687"
+        uri = os.environ.get("NEO4J_URI", "bolt://neo4j:7687")
         username = "neo4j"
-        password = "clara-neo4j"
+        password = os.environ.get("NEO4J_PASSWORD", "clara-neo4j")
         
         self.__graph = Graph(
             uri=uri,
