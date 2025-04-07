@@ -212,6 +212,7 @@ class Quiz:
         self.knowledges: List[MemoryNode] = []
         self.problemset: Dict[str, List[Question]] = defaultdict(list)
         self.description: str = "The is a vocabulary learning task with several questions."
+        self.images = {}
     
     @staticmethod
     def intro(q_type: str):
@@ -239,7 +240,8 @@ class Quiz:
                     "type": "learn",
                     "props": {
                         "abstract": knowledge.get_prop("abstract"),
-                        "content": knowledge.get_prop("content")
+                        "content": knowledge.get_prop("content"),
+                        "images": self.images.get(knowledge.get_prop("m_id"), [])
                     }
                 }
             )
@@ -412,7 +414,12 @@ class Quiz:
                 node = retriever.match_node(
                     {"m_id": m_id}
                 )[0]
+                urls = []
+                for _, _, image_node in retriever.match(from_prop={"m_id": m_id}, to_prop={"label": "image"}, rela_prop={}, bidirect=True):
+                    url = image_node.get_prop("content")
+                    urls.append(url)
                 quiz.addn(node)
+                quiz.images[m_id] = random.sample(urls, k=2)
             except Exception as e:
                 logger.error(f"Quiz.load() : an error ocurred while attempting to load a knowledge from quiz {filepath}", e)
         for question_type in quiz_dat:

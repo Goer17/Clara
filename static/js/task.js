@@ -20,6 +20,7 @@ window.addEventListener('unload', () => {
 document.addEventListener("DOMContentLoaded", () => {
     const question = document.getElementById("question");
     const analysis = document.getElementById("analysis");
+    const supplement = document.getElementById("supplement");
     const answerInput = document.getElementById("answer");
     const finishButton = document.getElementById("finish");
     const player = document.getElementById("player")
@@ -63,6 +64,22 @@ document.addEventListener("DOMContentLoaded", () => {
             else if (data.type === "learn") {
                 question.innerText = data.props.abstract;
                 analysis.innerText = data.props.content;
+                for (let url in data.props.images) {
+                    const img = document.createElement('img');
+                    img.src = data.props.images[url];
+                    
+                    img.style.cssText = `
+                        padding: 4px;
+                        margin: 8px;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 6px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        display: block;
+                        max-width: 100%;
+                    `;
+                    
+                    supplement.appendChild(img);
+                }
                 answerInput.style.display = "none";
                 cur_state = STATE.NEXT;
             }
@@ -146,6 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
             cur_state = STATE.CONFIRM;
             marked = false;
             answerInput.value = "";
+            supplement.innerHTML = "";
         }
         else if (cur_state === STATE.CONFIRM) {
             answer = answerInput.value.trim();

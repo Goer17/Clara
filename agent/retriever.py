@@ -248,6 +248,8 @@ class Retriever:
             node = self.memory.add_node(node_profile)
             coro_list = []
             for sim_node in sim_nodes:
+                if sim_node.label == "image":
+                    continue
                 coro_list.append(gen_rela(node, sim_node))
             if len(coro_list) > 0:
                 asyncio.run(asyncio.wait(coro_list, timeout=None))

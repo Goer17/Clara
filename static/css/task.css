@@ -18,6 +18,9 @@ body {
     height: 80vh;
     padding: 0;
     overflow: hidden;
+
+    position: relative;  /* 确保子元素的定位基于 task-body */
+    overflow: hidden;    /* 防止内容溢出 */
 }
 
 #header {
@@ -34,10 +37,10 @@ body {
 #content {
     flex: 1;
     display: flex;
+    height: 75%;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 20px;
 }
 
 #display {
@@ -48,6 +51,18 @@ body {
     width: 80%;
     padding: 30px;
     text-align: center;
+    
+    box-sizing: border-box;
+    overflow-y: auto;
+    resize: none;
+    
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f0f0f0;
+}
+
+#supplement {
+    display: flex;
+    justify-content: center;
 }
 
 #answer {
@@ -72,6 +87,7 @@ body {
     padding: 15px;
     height: 8%;
     background: white;
+    flex-shrink: 0;
 }
 
 #finish {

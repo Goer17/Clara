@@ -138,28 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
             cur_word = word;
             cur_content = data.reply;
             appendMessage("assistant", `✅ Completed!\n${word}\n${data.reply}`);
-
-            appendMessage("assistant", `Trying to search images in the internet...`);
-            
-            const image_request = {
-                query: word,
-                max_n: 5
-            };
-            const reponse = await fetch("/chat/image", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(image_request)
-            });
-            const urls = await response.json()
-            
-            if (!response.ok) {
-                throw data.error
-            }
-            console.log(urls);
-            
-            // TODO: ...
         } catch (error) {
             appendMessage("assistant", error)
         }
@@ -201,6 +179,45 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.log(error)
         }
+        
+        try {
+            // fetch images
+            const image_request = {
+                query: cur_word,
+                max_n: 5
+            };
+            const imgs_response = await fetch("/chat/image", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(image_request)
+            });
+            const urls = (await imgs_response.json()).urls
+            
+            if (!imgs_response.ok) {
+                throw data.error
+            }
+            console.log(urls)
+            let imgs_content = ""
+            for (let i = 0; i < Math.min(4, urls.length); i++) {
+                imgs_content += `<img src="${urls[i].url}" style="
+                                    margin: 2px;
+                                    padding: 4px;
+                                    border: 1px solid #e0e0e0;
+                                    border-radius: 6px;
+                                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                                " />`
+            }
+            console.log(imgs_content)
+            if (imgs_content) {
+                appendMessage("assistant", `👁️ To help you better understand the word '${cur_word}', I've prepared some visual references sourced from the internet.\n${imgs_content}`)
+            }
+        }
+        catch (error) {
+            console.log(error)
+        }
+        
         addButton.removeChild(loading_icon_a);
         addButton.textContent = "✅";
     }
