@@ -125,6 +125,9 @@ class SentenceMakingQuestion(Question):
 class ListeningQuestion(Question):
     def __init__(self, content, solution, rela_nodes, analysis = None, *args, **kwargs):
         super().__init__(content, solution, rela_nodes, analysis, *args, **kwargs)
+        self.voice = kwargs.get("voice", None)
+        if self.voice is None:
+            self.voice = "echo"
     
     def question(self, hint = False):
         return "Listen to the sentence and write down what you hear."
@@ -258,18 +261,19 @@ class Quiz:
                 }
             )
             for idx, problem in enumerate(problems):
-                self.cards.append(
-                    {
-                        "type": "question",
-                        "props": {
-                            "type": q_type,
-                            "idx": idx,
-                            "question": problem.question(),
-                            "hint_question": problem.question(hint=True),
-                            "solution": problem.solution
-                        }
+                card = {
+                    "type": "question",
+                    "props": {
+                        "type": q_type,
+                        "idx": idx,
+                        "question": problem.question(),
+                        "hint_question": problem.question(hint=True),
+                        "solution": problem.solution,
                     }
-                )
+                }
+                if q_type == "ListeningQuestion":
+                    card["props"]["voice"] = problem.voice if hasattr(problem, "voice") else "echo"
+                self.cards.append(card)
     
     def card(self, idx: int) -> Dict[str, str]:
         if idx < len(self.cards):
@@ -375,11 +379,15 @@ class Quiz:
         for question_type in self.problemset:
             quiz_dat[question_type] = []
             for q in self.problemset[question_type]:
+                if q is None:
+                    continue
                 q_dat = {
                     "content": q.content,
                     "solution": q.solution,
                     "rela_nodes": []
                 }
+                if question_type == "ListeningQuestion":
+                    q_dat["voice"] = q.voice
                 if q.analysis:
                     q_dat["analysis"] = q.analysis
                 for rela_node in q.rela_nodes:
@@ -435,6 +443,7 @@ class Quiz:
                 content = q_dat["content"]
                 solution = q_dat["solution"]
                 analysis = q_dat.get("analysis", None)
+                voice = q_dat.get("voice", None)
                 rela_nodes = []
                 for m_id in q_dat["rela_nodes"]:
                     try:
@@ -444,7 +453,7 @@ class Quiz:
                         rela_nodes.append(rela_node)
                     except Exception as e:
                         logger.error(f"Quiz.load() : an error occurred while attempting to load a question from quiz : {filepath}", e)
-                q = question_class(content, solution, rela_nodes, analysis)
+                q = question_class(content, solution, rela_nodes, analysis, voice=voice)
                 quiz.addq(q)
             quiz.filepath = filepath
         return quiz

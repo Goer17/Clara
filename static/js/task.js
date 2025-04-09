@@ -91,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 answerInput.style.display = "block";
                 if (data.props.type === "ListeningQuestion") {
                     content = data.props.solution;
+                    voice = data.props.voice;
                     finishButton.disabled = true;
                     finishButton.textContent = "";
                     finishButton.appendChild(loading_icon);
@@ -100,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             headers: {
                                 "Content-Type": "application/json",
                             },
-                            body: JSON.stringify({content: content, t: 2})
+                            body: JSON.stringify({content: content, t: 2, voice: voice})
                         });
                         if (response.ok) {
                             const audioBlob = await response.blob();

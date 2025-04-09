@@ -1,3 +1,4 @@
+import random
 import asyncio
 from pathlib import Path
 import yaml, json, re
@@ -68,7 +69,8 @@ class Generator:
         try:
             response = Formatter.catch_json(response)
             sentence = response["sentence"]
-            question = ListeningQuestion(content="", solution=sentence, rela_nodes=rela_nodes)
+            voice = random.choice(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'])
+            question = ListeningQuestion(content="", solution=sentence, rela_nodes=rela_nodes, voice=voice)
             return question
         except Exception as e:
             logger.error("Generator.gen_listening() : an error occurred when attempting to generate a listening question", e)

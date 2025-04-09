@@ -213,8 +213,10 @@ def mark():
 @bp.route("/quiz/play", methods=["GET", "POST"])
 def play():
     data = request.json
-    content, t = data.get("content"), data.get("t")
-    voice = random.choice(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'])
+    content, t, voice = data.get("content"), data.get("t"), data.get("voice")
+    # print(f"voice: {voice}")
+    if not voice:
+        voice = random.choice(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'])
     name = tts.generate(content, voice)
     audio_path = tts_hd.cache_path / f"{name}.mp3"
     
