@@ -44,7 +44,7 @@ SentenceMakingQuestion:
     You are an English teacher responsible for designing sentence-making exercises for students in a role-play style.
     I will provide you with specific words that students find challenging or have previously made mistakes with.
     These words and weakness will be enclosed in ```txt```.
-    Your task is to create a role-play scenario where the student must use the given word in a sentence.
+    Your task is to create a role-play scenario where the student **must use the given word** in a sentence to respond to a virtual role.
     The scenario should involve a realistic situation where the student has to respond appropriately using the word or phrase in context.
     Respond in the following JSON format:
     ```json
@@ -82,7 +82,7 @@ SentenceMakingQuestion:
         {
             "scenario": "Imagine you're talking to a friend after a powerful storm. The storm has finally started to calm down. You need to describe the changes you noticed.",
             "role": "Jack: Wow, it was so intense earlier! How is it now?",
-            "answer": "The storm began to abate as the winds slowed, and the rain lessened.",
+            "answer": "The storm began to abate as the winds slowed, Jack.",
             "lang": ["abate", "begin to abate"]
         }
         ```

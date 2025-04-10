@@ -171,6 +171,10 @@ class AMEngine:
             api_key=api_kay,
             base_url=base_url
         )
+        self.async_client = AsyncClient(
+            api_key=api_kay,
+            base_url=base_url
+        )
         self.model = model
 
     def generate(self, text: str, voice: str) -> str:
@@ -190,6 +194,27 @@ class AMEngine:
         )
         response.write_to_file(path)
         logger.info(f"AMEngine.generate() : an audio file was successfully generated: {str(path)}")
+        
+        return name
+
+    async def async_generate(self, text: str, voice: str, timeout: int = None) -> str:
+        logger.info(f"text: {text}, voice: {voice}")
+        tag = f"[{voice}] : {text}".encode('utf-8')
+        name = f"audio[{hashlib.md5(tag).hexdigest()}]"
+        filename = f"{name}.mp3"
+        if not os.path.exists(AMEngine.cache_path):
+            os.makedirs(AMEngine.cache_path)
+        path = self.cache_path / filename
+        if os.path.exists(path):
+            return name
+        response = await self.async_client.audio.speech.create(
+            model=self.model,
+            voice=voice,
+            input=text,
+            timeout=timeout
+        )
+        response.write_to_file(path)
+        logger.info(f"AMEngine.async_generate() : an audio file was successfully generated: {str(path)}")
         
         return name
         

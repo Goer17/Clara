@@ -1,5 +1,5 @@
 import random
-import asyncio
+from utils.general import tts_hd
 from pathlib import Path
 import yaml, json, re
 from utils.general import (
@@ -71,6 +71,10 @@ class Generator:
             sentence = response["sentence"]
             voice = random.choice(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'])
             question = ListeningQuestion(content="", solution=sentence, rela_nodes=rela_nodes, voice=voice)
+            try:
+                await tts_hd.async_generate(text=sentence, voice=voice, timeout=60)
+            except Exception as e:
+                pass
             return question
         except Exception as e:
             logger.error("Generator.gen_listening() : an error occurred when attempting to generate a listening question", e)

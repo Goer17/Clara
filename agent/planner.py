@@ -196,7 +196,7 @@ class Planner:
                             familiarity = node.get_prop("familarity")
                             if familiarity is None:
                                 familiarity = 0
-                            familiarity += 25
+                            familiarity += 50
                             node.set_prop("familiarity", familiarity)
                             node.update()
                             if familiarity >= 100:
