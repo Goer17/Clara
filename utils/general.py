@@ -246,6 +246,12 @@ gpt_4o = LLMEngine(
     base_url=base_url
 )
 
+gpt_4o_mini = LLMEngine(
+    model="gpt-4o-mini",
+    api_key=openai_api_key,
+    base_url=base_url
+)
+
 o1_mini = LLMEngine(
     model="o1-mini",
     api_key=openai_api_key,

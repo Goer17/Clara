@@ -63,7 +63,7 @@ class Planner:
             }
         ]
         def generate_task():
-            n = 5
+            n = 4
             config = {
                 "GapFillingQuestion": n,
                 "ListeningQuestion": n,
