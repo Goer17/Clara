@@ -50,6 +50,7 @@ body {
 .content {
     margin-left: 220px; /* 为 navigator 留出空间 */
     padding: 20px;
+    height: calc(100vh - 60px);
 }
 
 input:focus, textarea:focus {

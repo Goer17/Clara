@@ -1,6 +1,6 @@
 #content-body {
     width: 80%;
-    height: 70%;
+    height: 75%;
     margin: 20px auto;
     background: white;
     padding: 20px;
@@ -40,8 +40,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 20px;
     gap: 15px;
+    margin-top: -30px;
 }
 
 button {
